@@ -25,7 +25,7 @@ Boards:
      - Crystal
      - Clock for the whole system
    - ICs
-     - ATMEGA16 (or ATMEGA328?)
+     - ATMEGA16
        - Pins: 5V, GND, Reset, UART (2), 595 control (4), DATA (8), clock out, memory control (3), SDCard (4), IORQ (interrupted), BUSRQ/AK (2), RSTZ80, WAITST
        - Maybe: interrupt, NMI, I²C for RTC (2), crystal (2)
        - Total: 30, maybe 6
