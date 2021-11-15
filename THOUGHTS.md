@@ -22,8 +22,9 @@ Boards:
      - ROM
      - SDCard + FAT
      - Memory copy block
-     - Crystal
-     - Clock for the whole system
+     - Random value provider
+     - Wall clock
+     - Clock signal for the whole system
    - ICs
      - ATMEGA16
        - Pins: 5V, GND, Reset, UART (2), 595 control (4), DATA (8), clock out, memory control (3), SDCard (4), IORQ (interrupted), BUSRQ/AK (2), RSTZ80, WAITST
