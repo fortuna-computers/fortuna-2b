@@ -27,6 +27,7 @@ Boards:
    - ICs
      - ATMEGA16 (or ATMEGA328?)
      - 74HC595 for Address bus expansion
+       - Pins controlling 74HC595: SER (x2), SRCLK, OE (RCLK and SRCLR are kept high)
      - RTC?
      - Crystal?
    - Header for Fortuna Connector
