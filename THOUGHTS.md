@@ -54,3 +54,34 @@ Boards:
 
  - Maybe external connection to debugger?
 
+## Pinouts
+
+I/O board
+
+```
+ 1 - BUSRQ    MOSI
+ 2 - BUSAK    MISO
+ 3 - RSTZ80    SCK
+ 4 - RX         TX
+ 5 - VCC        A9
+ 6 - A15        A8
+
+ 7 - A14        A7
+ 8 - A13        A6
+ 9 - A12        A5
+10 - A11        A4
+11 - A10        A3
+12 - MREQ       A2
+
+13 - WR         A1
+14 - RD         A0
+15 - IORQ       D7
+16 - CLK        D6
+17 - INT        D5
+18 - NMI        D4
+
+19 - WAITST     D3
+20 - GND        D2
+21 -            D1
+22 -            D0
+```
