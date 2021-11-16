@@ -1,0 +1,19 @@
+- [X] Build I/O board
+- [ ] Serial
+- [ ] ADDR
+- [ ] RTC
+- [ ] SDCard
+- [ ] Build RAM board
+- [ ] RAM
+- [ ] Build main board
+- [ ] Z80 - regular execution
+- [ ] Z80 - I/O
+- [ ] Special I/O commands
+  - [ ] UART
+  - [ ] SDCard (raw)
+  - [ ] Random
+  - [ ] Memory copy block
+  - [ ] Wall clock
+- [ ] Boot
+- [ ] FAT
+- [ ] Video / Keyboard
