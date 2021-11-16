@@ -1,6 +1,6 @@
 - [X] Build I/O board
 - [X] Serial
-- [ ] Random
+- [X] Random
 - [ ] ADDR
 - [ ] RTC
 - [ ] SDCard
