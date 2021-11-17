@@ -57,6 +57,13 @@ void uart_puthex(uint8_t v)
     uart_putchar(' ');
 }
 
+void uart_putbin(uint8_t value)
+{
+    for (int i = 7; i >= 0; --i)
+        uart_putchar(((value >> i) & 1) ? '1' : '0');
+    uart_putchar(' ');
+}
+
 void uart_clrscr()
 {
     uart_print_P(PSTR("\033[2J\033[H"));

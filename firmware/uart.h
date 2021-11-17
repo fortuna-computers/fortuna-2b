@@ -10,6 +10,7 @@ int uart_getchar();
 
 void uart_print_P(PGM_P string);
 void uart_puthex(uint8_t value);
+void uart_putbin(uint8_t value);
 void uart_clrscr();
 
 #endif

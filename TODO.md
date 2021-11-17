@@ -1,7 +1,8 @@
 - [X] Build I/O board
 - [X] Serial
 - [X] Random
-- [ ] ADDR
+- [X] ADDR (high)
+- [ ] ADDR (low)
 - [ ] RTC
 - [ ] SDCard
 - [ ] Build RAM board

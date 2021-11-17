@@ -3,6 +3,7 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
+#include "addr.h"
 #include "random.h"
 #include "uart.h"
 
@@ -12,6 +13,12 @@ int main()
     uart_clrscr();
 
     random_init();
+    addr_init();
+
+    addr_set(0xff00);
+    addr_set(0b1010001100000000);
+
+    for (;;);
 
     return 0;
 }
