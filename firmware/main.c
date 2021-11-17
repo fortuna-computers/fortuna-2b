@@ -15,9 +15,6 @@ int main()
     random_init();
     addr_init();
 
-    addr_set(0xff00);
-    addr_set(0b1010001100000000);
-
     for (;;);
 
     return 0;
