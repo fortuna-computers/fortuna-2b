@@ -27,7 +27,6 @@ void addr_set(uint16_t addr)
     uint8_t portc = PORTC & 0b11100011;  // bytes to keep
 
     for (int i = 0; i < 8; ++i) {
-    // for (int i = 7; i >= 0; --i) {
 
         // set SER_L
         if ((addr >> i) & 1)
