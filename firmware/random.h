@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void    random_init();
-uint8_t random_value();
+void    random_init(void);
+uint8_t random_value(void);
 
 #endif

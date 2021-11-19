@@ -8,17 +8,16 @@
 #include "rtc.h"
 #include "uart.h"
 
-int main()
+int main(void)
 {
     uart_init();
     // uart_clrscr();
 
     random_init();
     addr_init();
-    if (!rtc_init())
-        uart_print_P(PSTR("RTC FAIL\n"));
 
-    uart_print_P(PSTR("Hello world!\n"));
+    try(rtc_init());
+    rtc_print_datetime();
 
     for (;;);
 

@@ -2,15 +2,20 @@
 #define UART_H_
 
 #include <avr/pgmspace.h>
+#include "response.h"
 
-void uart_init();
+void    uart_init(void);
 
-void uart_putchar(char c);
-int uart_getchar();
+void    uart_putchar(char c);
+uint8_t uart_getchar(void);
 
-void uart_print_P(PGM_P string);
-void uart_puthex(uint8_t value);
-void uart_putbin(uint8_t value);
-void uart_clrscr();
+void    uart_print_P(PGM_P string);
+void    uart_puthex(uint8_t value);
+void    uart_putbin(uint8_t value);
+void    uart_putdec(uint8_t value);
+void    uart_clrscr(void);
+
+void    uart_puthex_red(uint8_t value);
+void    uart_puthex_green(uint8_t value);
 
 #endif

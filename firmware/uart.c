@@ -6,7 +6,7 @@
 #include <util/delay.h>
 #include <util/setbaud.h>
 
-void uart_init()
+void uart_init(void)
 {
     _delay_ms(100);
     
@@ -16,7 +16,7 @@ void uart_init()
 
     // set config
     UCSRC = (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);   // Async-mode 
-    UCSRB = (1<<RXEN) | (1<<TXEN);     // Enable Receiver and Transmitter
+    UCSRB = (1<<RXEN) | (1<<TXEN);                  // Enable Receiver and Transmitter
 
     _delay_ms(100);
 }
@@ -29,7 +29,7 @@ void uart_putchar(char c)
     UDR = c;
 }
 
-int uart_getchar()
+uint8_t uart_getchar(void)
 {
     loop_until_bit_is_set(UCSRA, RXC);
     return UDR;
@@ -64,7 +64,35 @@ void uart_putbin(uint8_t value)
     uart_putchar(' ');
 }
 
-void uart_clrscr()
+void uart_putdec(uint8_t value)
+{
+    if (value >= 100)
+        uart_putchar((value / 100) + '0');
+    if (value >= 10)
+        uart_putchar(((value / 10) % 10) + '0');
+    uart_putchar((value % 10) + '0');
+}
+
+void uart_clrscr(void)
 {
     uart_print_P(PSTR("\033[2J\033[H"));
+}
+
+static void uart_reset(void)
+{
+    uart_print_P(PSTR("\e[0m"));
+}
+
+void uart_puthex_red(uint8_t value)
+{
+    uart_print_P(PSTR("\e[0;31m"));
+    uart_puthex(value);
+    uart_reset();
+}
+
+void uart_puthex_green(uint8_t value)
+{
+    uart_print_P(PSTR("\e[0;32m"));
+    uart_puthex(value);
+    uart_reset();
 }

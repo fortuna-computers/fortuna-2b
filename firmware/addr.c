@@ -8,12 +8,12 @@
 #define SRCLK PC4
 #define OE    PC5
 
-void addr_init()
+void addr_init(void)
 {
     DDRC |= _BV(DDC2) | _BV(DDC3) | _BV(DDC4) | _BV(DDC5);
     PORTC |= _BV(OE);
 
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < 9; ++i) {   // clear 595
         PORTC |= _BV(SRCLK);
         PORTC &= ~_BV(SRCLK);
     }
@@ -53,7 +53,7 @@ void addr_set(uint16_t addr)
     PORTC &= ~_BV(OE);
 }
 
-void addr_disable()
+void addr_disable(void)
 {
     PORTC |= _BV(OE);
 }

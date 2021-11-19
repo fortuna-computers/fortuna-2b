@@ -2,6 +2,8 @@
 
 #include <util/twi.h>
 
+#include "uart.h"
+
 #define F_SCL 100000L // I2C clock speed 100 kHz
 
 #define TW_READY  (TWCR & 0x80) // ready when TWINT returns to logic 1.
@@ -19,91 +21,117 @@
 #define MONTHS_REG  0x05
 #define YEARS_REG   0x06
 
-#define READ 1
+#define RTC_DEBUG 1
 
-static uint8_t i2c_start()
+static Response i2c_start(uint8_t addr)
 {
     TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN);
     while (!TW_READY);
-    return TW_STATUS == 0x08;
-}
-
-static uint8_t i2c_send_addr(uint8_t addr)
-{
     TWDR = addr;
+#ifdef RTC_DEBUG
+    uart_puthex_green(addr);
+#endif
     TWCR = TW_SEND;
     while (!TW_READY);
-    return TW_STATUS == 0x18;
+#ifdef RTC_DEBUG
+    uart_puthex_red(TW_STATUS);
+#endif
+    return (TW_STATUS == 0x18) ? R_OK : R_RTC_START_FAIL;
 }
 
-static uint8_t i2c_write(uint8_t data)
+static Response i2c_write(uint8_t data)
 {
-    TWCR = data;
+    TWDR = data;
+#ifdef RTC_DEBUG
+    uart_puthex_green(data);
+#endif
     TWCR = TW_SEND;
     while (!TW_READY);
-    return TW_STATUS == 0x28;
+#ifdef RTC_DEBUG
+    uart_puthex_red(TW_STATUS);
+#endif
+    return (TW_STATUS == 0x28) ? R_OK : R_RTC_WRITE_FAIL;
 }
 
-static uint8_t i2c_read_nack()
+static Response i2c_read_nack(uint8_t* data)
 {
     TWCR = TW_NACK;
     while (!TW_READY);
-    return TWDR;
+#ifdef RTC_DEBUG
+    uart_puthex_red(TW_STATUS);
+#endif
+    *data = TWDR;
+    return (TW_STATUS == TW_MR_DATA_ACK) ? R_OK : R_RTC_READ_FAIL;
 }
 
-static void i2c_stop()
+static void i2c_stop(void)
 {
     TWCR = TW_STOP;
 }
 
 static void i2c_write_reg(uint8_t device_reg, uint8_t data)
 {
-    i2c_start();
-    i2c_send_addr(DS1307);
-    i2c_write(device_reg);
-    i2c_write(data);
+    try(i2c_start(DS1307 | TW_WRITE));
+    try(i2c_write(device_reg));
+    try(i2c_write(data));
     i2c_stop();
 }
 
 static uint8_t i2c_read_reg(uint8_t device_reg)
 {
     uint8_t data = 0;
-    i2c_start();
-    i2c_send_addr(DS1307);
-    i2c_write(device_reg);
-    i2c_start();
-    i2c_send_addr(DS1307 + READ);
-    data = i2c_read_nack();
+    try(i2c_start(DS1307 | TW_WRITE));
+    try(i2c_write(device_reg));
+    try(i2c_start(DS1307 | TW_READ));
+    try(i2c_read_nack(&data));
     i2c_stop();
     return data;
 }
 
-bool rtc_init()
+Response rtc_init(void)
 {
     TWSR = 0;
     TWBR = (F_CPU / F_SCL - 16) / 2;
-    if (i2c_start() != 1)
-        return false;
-
-    return true;
+    return R_OK;
 }
 
-bool rtc_datetime(RTC_DateTime* dt)
+Response rtc_datetime(RTC_DateTime* dt)
 {
-    dt->yy = i2c_read_reg(DS1307, YEARS_REG);
-    dt->mm = i2c_read_reg(DS1307, MONTHS_REG);
-    dt->dd = i2c_read_reg(DS1307, DAYS_REG);
-    dt->hh = i2c_read_reg(DS1307, HOURS_REG);
-    dt->nn = i2c_read_reg(DS1307, MINUTES_REG);
-    dt->ss = i2c_read_reg(DS1307, SECONDS_REG);
+    dt->yy = i2c_read_reg(YEARS_REG);
+    /*
+    dt->mm = i2c_read_reg(MONTHS_REG);
+    dt->dd = i2c_read_reg(DAYS_REG);
+    dt->hh = i2c_read_reg(HOURS_REG);
+    dt->nn = i2c_read_reg(MINUTES_REG);
+    dt->ss = i2c_read_reg(SECONDS_REG);
 
     // select between 12h and 24h
     if (dt->hh & 0x40)
         dt->hh &= 0x1f;
     else
         dt->hh &= 0x3f;
+    */
 
-    return true;  // TODO - check errors
+    return R_OK;  // TODO - check errors
+}
+
+void rtc_print_datetime(void)
+{
+    RTC_DateTime dt;
+    try(rtc_datetime(&dt));
+    uart_print_P(PSTR("RTC "));
+    uart_putdec(dt.hh);
+    uart_putchar(':');
+    uart_putdec(dt.nn);
+    uart_putchar(':');
+    uart_putdec(dt.ss);
+    uart_putchar(' ');
+    uart_putdec(dt.mm);
+    uart_putchar('/');
+    uart_putdec(dt.dd);
+    uart_putchar('/');
+    uart_putdec(dt.yy);
+    uart_putchar('\n');
 }
 
 // http://w8bh.net/avr/AvrDS1307.pdf

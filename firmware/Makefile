@@ -2,7 +2,7 @@
 PROJECT=fortuna-io
 
 # Object files (one for each source file)
-OBJECTS=main.o uart.o random.o addr.o rtc.o
+OBJECTS=main.o response.o uart.o random.o addr.o rtc.o
 
 # Avrdude configuration to connect on the PI. See avrdude_gpio.conf.
 # Can be one of: pi_rst, pi_cs0, pi_cs1 or pi_gpio, depending on the RESET line in AVR.
@@ -27,7 +27,11 @@ BAUD=38400
 
 AVRDUDE_FLAGS=-p ${MCU_AVRDUDE} -C +./avrdude_gpio.conf -c ${AVRDUDE_CONFIG} -V
 CC=avr-gcc
-CPPFLAGS=-std=c11 -Wall -Wextra -Os -DF_CPU=${F_CPU} -DBAUD=${BAUD} -mmcu=${MCU_GCC} -ffunction-sections -fdata-sections -mcall-prologues
+WARNINGS=-Wall -Wextra \
+	 -Wformat=2 -Wno-unused-parameter -Wshadow \
+	 -Wwrite-strings -Wstrict-prototypes -Wold-style-definition \
+	 -Wredundant-decls -Wnested-externs -Wmissing-include-dirs -Wjump-misses-init -Wlogical-op
+CPPFLAGS=-std=c11 ${WARNINGS} -Os -DF_CPU=${F_CPU} -DBAUD=${BAUD} -mmcu=${MCU_GCC} -ffunction-sections -fdata-sections -mcall-prologues
 
 all: ${PROJECT}.hex
 
