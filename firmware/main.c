@@ -30,4 +30,3 @@ ISR(BADISR_vect)
     puts_P(PSTR("!!!"));
     for(;;);
 }
-

@@ -2,11 +2,11 @@
 - [X] Serial
 - [X] Random
 - [X] ADDR (high)
-- [ ] ADDR (low)
-- [ ] RTC
-- [ ] SDCard
+- [X] ADDR (low)
+- [X] RTC
 - [ ] Build RAM board
 - [ ] RAM
+- [ ] SDCard
 - [ ] Build main board
 - [ ] Z80 - regular execution
 - [ ] Z80 - I/O
