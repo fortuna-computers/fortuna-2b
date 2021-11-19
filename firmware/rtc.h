@@ -1,17 +1,30 @@
-#ifndef RTC_H_
-#define RTC_H_
+/*
+ds1307 lib 0x01
 
-#include <stdbool.h>
-#include <stdint.h>
+copyright (c) Davide Gironi, 2013
 
-#include "response.h"
+Released under GPLv3.
+Please refer to LICENSE file for licensing information.
 
-typedef struct RTC_DateTime {
-    uint8_t yy, mm, dd, hh, nn, ss;
-} RTC_DateTime;
+References: parts of the code taken from https://github.com/adafruit/RTClib
+*/
 
-void     rtc_init(void);
-Response rtc_datetime(RTC_DateTime* dt);
-void     rtc_print_datetime(void);
+
+#ifndef RTC_H
+#define RTC_H
+
+//definitions
+#define DS1307_ADDR (0x68<<1) //device address
+
+//path to i2c fleury lib
+#define DS1307_I2CFLEURYPATH "i2cmaster.h" //define the path to i2c fleury lib
+#define DS1307_I2CINIT 1 //init i2c
+
+//functions
+void    rtc_init(void);
+uint8_t rtc_setdate(uint8_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second);
+void    rtc_getdate(uint8_t *year, uint8_t *month, uint8_t *day, uint8_t *hour, uint8_t *minute, uint8_t *second);
+void    rtc_print_datetime(void);
 
 #endif
+

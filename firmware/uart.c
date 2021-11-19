@@ -64,11 +64,11 @@ void uart_putbin(uint8_t value)
     uart_putchar(' ');
 }
 
-void uart_putdec(uint8_t value)
+void uart_putdec(uint8_t value, uint8_t digits)
 {
-    if (value >= 100)
+    if (value >= 100 || digits > 2)
         uart_putchar((value / 100) + '0');
-    if (value >= 10)
+    if (value >= 10 || digits > 1)
         uart_putchar(((value / 10) % 10) + '0');
     uart_putchar((value % 10) + '0');
 }
