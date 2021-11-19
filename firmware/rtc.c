@@ -9,9 +9,6 @@
 #define TW_READY  (TWCR & 0x80) // ready when TWINT returns to logic 1.
 
 #define DS1307  0xD0 // I2C bus address of DS1307 RTC
-#define TW_NACK 0x84 // read data with NACK (last byte)
-#define TW_SEND 0x84 // send data (TWINT,TWEN)
-#define TW_STOP 0x94 // send stop condition (TWINT,TWSTO,TWEN)
 
 #define SECONDS_REG 0x00
 #define MINUTES_REG 0x01
@@ -21,7 +18,62 @@
 #define MONTHS_REG  0x05
 #define YEARS_REG   0x06
 
-#define RTC_DEBUG 1
+void rtc_init(void)
+{
+    TWSR = 0;                         // clear status register
+    TWBR = (F_CPU / F_SCL - 16) / 2;  // set I²C speed
+}
+
+static void rtc_wait_until_ready()
+{
+    while (!(TWCR & _BV(TWINT)));
+}
+
+static uint8_t rtc_read_reg(uint8_t reg)
+{
+    TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN);   // clear interrupt, set as master, enable I²C
+    rtc_wait_until_ready();
+    
+    // send device ID, prepare for writing
+    TWDR = DS1307 | TW_WRITE;
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+    rtc_wait_until_ready();
+    if (TW_STATUS != TW_MT_SLA_ACK)
+        return R_RTC_SLA_FAIL;
+    
+    // write device to be read from
+    TWDR = reg;
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+    if (TW_STATUS != TW_MT_DATA_ACK)
+        return R_RTC_WRITE_FAIL;
+    
+    // send device ID, prepare for reading
+    TWDR = DS1307 | TW_READ;
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+    rtc_wait_until_ready();
+    if (TW_STATUS != TW_MR_SLA_ACK)
+        return R_RTC_SLA_FAIL;
+    
+    // read register
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+    rtc_wait_until_ready();
+    uint8_t data = TWDR;
+    if (TW_STATUS != TW_ST_DATA_ACK)
+        return R_RTC_READ_FAIL;
+    
+    // stop communcation
+    TWCR = _BV(TWINT) | _BV(TWSTO) | _BV(TWEN);
+    return R_OK;
+}
+
+
+#if 0
+
+#define TW_NACK 0x84 // read data with NACK (last byte)
+#define TW_SEND 0x84 // send data (TWINT,TWEN)
+#define TW_STOP 0x94 // send stop condition (TWINT,TWSTO,TWEN)
+
+// #define RTC_DEBUG 1
 
 static Response i2c_start(uint8_t addr)
 {
@@ -36,7 +88,7 @@ static Response i2c_start(uint8_t addr)
 #ifdef RTC_DEBUG
     uart_puthex_red(TW_STATUS);
 #endif
-    return (TW_STATUS == 0x18) ? R_OK : R_RTC_START_FAIL;
+    return (TW_STATUS == 0x18) ? R_OK : R_RTC_SLA_FAIL;
 }
 
 static Response i2c_write(uint8_t data)
@@ -94,10 +146,11 @@ Response rtc_init(void)
     TWBR = (F_CPU / F_SCL - 16) / 2;
     return R_OK;
 }
+#endif
 
 Response rtc_datetime(RTC_DateTime* dt)
 {
-    dt->yy = i2c_read_reg(YEARS_REG);
+    dt->yy = rtc_read_reg(YEARS_REG);
     /*
     dt->mm = i2c_read_reg(MONTHS_REG);
     dt->dd = i2c_read_reg(DAYS_REG);

@@ -16,7 +16,7 @@ int main(void)
     random_init();
     addr_init();
 
-    try(rtc_init());
+    rtc_init();
     rtc_print_datetime();
 
     for (;;);
