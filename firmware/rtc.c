@@ -1,145 +1,152 @@
-/*
-ds1307 lib 0x01
-
-copyright (c) Davide Gironi, 2013
-
-Released under GPLv3.
-Please refer to LICENSE file for licensing information.
-*/
-
-
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#include <util/delay.h>
-
 #include "rtc.h"
+
+#include <util/twi.h>
+
+#include "config.h"
 #include "uart.h"
+#include "response.h"
 
-//path to i2c fleury lib
-#include DS1307_I2CFLEURYPATH
+#define TW_READY  (TWCR & 0x80) // ready when TWINT returns to logic 1.
 
-/*
- * days per month
- */
-const uint8_t rtc_daysinmonth [] PROGMEM = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+#define DS1307  0xD0 // I2C bus address of DS1307 RTC
 
-/*
- * initialize the accellerometer
- */
-void rtc_init(void) {
-	#if DS1307_I2CINIT == 1
-	//init i2c
-	i2c_init();
-	_delay_us(10);
-	#endif
+#define SECONDS_REG 0x00
+#define MINUTES_REG 0x01
+#define HOURS_REG   0x02
+#define DAYOFWK_REG 0x03
+#define DAYS_REG    0x04
+#define MONTHS_REG  0x05
+#define YEARS_REG   0x06
+
+void rtc_init(void)
+{
+    TWSR = 0;                         // clear status register
+    TWBR = (F_CPU / F_SCL - 16) / 2;  // set I²C speed
 }
 
-/*
- * transform decimal value to bcd
- */
-uint8_t rtc_dec2bcd(uint8_t val) {
-	return val + 6 * (val / 10);
+static void rtc_wait_until_ready(void)
+{
+    while (!(TWCR & _BV(TWINT)));
 }
 
-/*
- * transform bcd value to deciaml
- */
-static uint8_t rtc_bcd2dec(uint8_t val) {
-	return val - 6 * (val >> 4);
+static void rtc_start(void)
+{
+    TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN);   // clear interrupt, set as master, enable I²C
+    rtc_wait_until_ready();
 }
 
-/*
- * get number of days since 2000/01/01 (valid for 2001..2099)
- */
-static uint16_t rtc_date2days(uint8_t y, uint8_t m, uint8_t d) {
-	uint16_t days = d;
-	for (uint8_t i = 1; i < m; ++i)
-		days += pgm_read_byte(rtc_daysinmonth + i - 1);
-	if (m > 2 && y % 4 == 0)
-		++days;
-	return days + 365 * y + (y + 3) / 4 - 1;
+static void rtc_write(uint8_t value)
+{
+    TWDR = value;
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+#ifdef RTC_DEBUG
+    uart_puthex_green(value);
+#endif
+    rtc_wait_until_ready();
 }
 
-/*
- * get day of a week
- */
-uint8_t rtc_getdayofweek(uint8_t y, uint8_t m, uint8_t d) {
-	uint16_t day = rtc_date2days(y, m, d);
-	return (day + 6) % 7;
+static uint8_t rtc_read(void)
+{
+    TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
+    rtc_wait_until_ready();
+    uint8_t data = TWDR;
+#ifdef RTC_DEBUG
+    uart_puthex_red(data);
+#endif
+    return data;
 }
 
-/*
- * set date
- */
-uint8_t rtc_setdate(uint8_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) {
-	//sanitize data
-	if (second > 59 ||
-		minute > 59 ||
-		hour > 23 ||
-		day < 1 || day > 31 ||
-		month < 1 || month > 12 ||
-		year > 99)
-		return 8;
-
-	//sanitize day based on month
-	if(day > pgm_read_byte(rtc_daysinmonth + month - 1))
-		return 0;
-
-	//get day of week
-	uint8_t dayofweek = rtc_getdayofweek(year, month, day);
-
-	//write date
-	i2c_start_wait(DS1307_ADDR | I2C_WRITE);
-	i2c_write(0x00);//stop oscillator
-	i2c_write(rtc_dec2bcd(second));
-	i2c_write(rtc_dec2bcd(minute));
-	i2c_write(rtc_dec2bcd(hour));
-	i2c_write(rtc_dec2bcd(dayofweek));
-	i2c_write(rtc_dec2bcd(day));
-	i2c_write(rtc_dec2bcd(month));
-	i2c_write(rtc_dec2bcd(year));
-	i2c_write(0x00); //start oscillator
-	i2c_stop();
-
-	return 1;
+static uint8_t rtc_status(void)
+{
+#ifdef RTC_DEBUG
+    uart_puthex(TW_STATUS);
+#endif
+    return TW_STATUS;
 }
 
-/*
- * get date
- */
-void rtc_getdate(uint8_t *year, uint8_t *month, uint8_t *day, uint8_t *hour, uint8_t *minute, uint8_t *second) {
-	i2c_start_wait(DS1307_ADDR | I2C_WRITE);
-	i2c_write(0x00);//stop oscillator
-	i2c_stop();
+static void rtc_stop(void)
+{
+    TWCR = _BV(TWINT) | _BV(TWSTO) | _BV(TWEN);
+}
 
-	i2c_rep_start(DS1307_ADDR | I2C_READ);
-	*second = rtc_bcd2dec(i2c_readAck() & 0x7F);
-	*minute = rtc_bcd2dec(i2c_readAck());
-	*hour = rtc_bcd2dec(i2c_readAck());
-	i2c_readAck();
-	*day = rtc_bcd2dec(i2c_readAck());
-	*month = rtc_bcd2dec(i2c_readAck());
-	*year = rtc_bcd2dec(i2c_readNak());
-	i2c_stop();
+static Response rtc_read_reg(uint8_t reg, uint8_t* data)
+{
+    // send device ID, prepare for writing
+    rtc_start();
+    rtc_write(DS1307 | TW_WRITE);
+    if (rtc_status() != TW_MT_SLA_ACK)
+        return R_RTC_SLA_FAIL;
+    
+    // write device to be read from
+    rtc_write(reg);
+    if (rtc_status() != TW_MT_DATA_ACK)
+        return R_RTC_WRITE_FAIL;
+    
+    // send device ID, prepare for reading
+    rtc_start();
+    rtc_write(DS1307 | TW_READ);
+    if (rtc_status() != TW_MR_SLA_ACK)
+        return R_RTC_SLA_FAIL;
+    
+    // read register
+    *data = rtc_read();
+    if (rtc_status() != TW_MR_DATA_NACK)
+        return R_RTC_READ_FAIL;
+
+    // stop communcation
+    rtc_stop();
+    return R_OK;
+}
+
+static uint8_t bcd(uint8_t hexvalue)
+{
+    return (hexvalue & 0xf) + ((hexvalue >> 4) * 10);
+}
+
+Response rtc_datetime(RTC_DateTime* dt)
+{
+    /*
+    try(rtc_read_reg(YEARS_REG,   &dt->yy));
+    try(rtc_read_reg(MONTHS_REG,  &dt->mm));
+    try(rtc_read_reg(DAYS_REG,    &dt->dd));
+    try(rtc_read_reg(HOURS_REG,   &dt->hh));
+    try(rtc_read_reg(MINUTES_REG, &dt->nn));
+    */
+    try(rtc_read_reg(SECONDS_REG, &dt->ss));
+
+    // select between 12h and 24h
+    if (dt->hh & 0x40)
+        dt->hh &= 0x1f;
+    else
+        dt->hh &= 0x3f;
+
+    dt->yy = bcd(dt->yy);
+    dt->mm = bcd(dt->mm);
+    dt->dd = bcd(dt->dd);
+    dt->hh = bcd(dt->hh);
+    dt->nn = bcd(dt->nn);
+    dt->ss = bcd(dt->ss);
+
+    return R_OK;
 }
 
 void rtc_print_datetime(void)
 {
-    uint8_t year, month, day, hour, minute, second;
-    rtc_getdate(&year, &month, &day, &hour, &minute, &second);
-
+    RTC_DateTime dt;
+    try(rtc_datetime(&dt));
     uart_print_P(PSTR("RTC "));
-    uart_putdec(hour, 2);
+    uart_putdec(dt.hh, 2);
     uart_putchar(':');
-    uart_putdec(minute, 2);
+    uart_putdec(dt.nn, 2);
     uart_putchar(':');
-    uart_putdec(second, 2);
+    uart_putdec(dt.ss, 2);
     uart_putchar(' ');
-    uart_putdec(month, 1);
+    uart_putdec(dt.mm, 1);
     uart_putchar('/');
-    uart_putdec(day, 1);
+    uart_putdec(dt.dd, 1);
     uart_putchar('/');
-    uart_putdec(year, 2);
+    uart_putdec(dt.yy, 2);
     uart_putchar('\n');
 }
 
+// http://w8bh.net/avr/AvrDS1307.pdf

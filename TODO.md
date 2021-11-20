@@ -3,7 +3,8 @@
 - [X] Random
 - [X] ADDR (high)
 - [X] ADDR (low)
-- [X] RTC
+- [ ] RTC
+- [ ] POST
 - [ ] Build RAM board
 - [ ] RAM
 - [ ] SDCard
