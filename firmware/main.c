@@ -8,10 +8,11 @@
 #include "addr.h"
 #include "post.h"
 #include "random.h"
+#include "ram.h"
 #include "rtc.h"
 #include "uart.h"
 
-uint8_t buffer[512] = { 0 };
+volatile uint8_t buffer[512] = { 0 };
 
 int main(void)
 {
@@ -23,6 +24,7 @@ int main(void)
     random_init();
     addr_init();
     rtc_init();
+    ram_init();
 
 #if POST_EXECUTE
     post_execute();

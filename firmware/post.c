@@ -2,6 +2,7 @@
 
 #include <avr/pgmspace.h>
 
+#include "ram.h"
 #include "rtc.h"
 #include "uart.h"
 
@@ -24,7 +25,12 @@ static void post_rtc(void)
     uart_putchar('\n');
 }
 
+static void post_ram(void)
+{
+}
+
 void post_execute(void)
 {
     post_rtc();
+    post_ram();
 }
