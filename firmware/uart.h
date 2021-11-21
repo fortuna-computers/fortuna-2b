@@ -11,6 +11,7 @@ uint8_t uart_getchar(void);
 
 void    uart_print_P(PGM_P string);
 void    uart_puthex(uint8_t value);
+void    uart_puthex16(uint16_t value);
 void    uart_putbin(uint8_t value);
 void    uart_putdec(uint8_t value, uint8_t digits);
 void    uart_clrscr(void);

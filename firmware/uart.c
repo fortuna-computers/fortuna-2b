@@ -57,6 +57,15 @@ void uart_puthex(uint8_t v)
     uart_putchar(' ');
 }
 
+void uart_puthex16(uint16_t v)
+{
+    uart_puthex_nibble(v >> 12);
+    uart_puthex_nibble((v >> 8) & 0xf);
+    uart_puthex_nibble((v >> 4) & 0xf);
+    uart_puthex_nibble(v & 0xf);
+    uart_putchar(' ');
+}
+
 void uart_putbin(uint8_t value)
 {
     for (int i = 7; i >= 0; --i)

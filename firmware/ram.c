@@ -4,9 +4,12 @@
 
 #include <avr/cpufunc.h>
 #include <avr/io.h>
+#include <util/delay.h>
 
 #include "addr.h"
 #include "buffer.h"
+#include "config.h"
+#include "uart.h"
 
 #define set_MREQ()    PORTD |= (1 << PD2)
 #define clear_MREQ()  PORTD &= ~(1 << PD2)
@@ -16,7 +19,7 @@
 #define clear_RD()    PORTD &= ~(1 << PD4)
 #define set_DATA(n)   PORTA = (n)
 #define get_DATA()    PINA
-#define WAIT()        _NOP()
+#define WAIT()        { _NOP(); _NOP(); }
 
 static void ram_bus_takeover(bool for_writing)
 {
@@ -35,7 +38,7 @@ static void ram_bus_takeover(bool for_writing)
 static void ram_bus_release(void)
 {
     addr_disable();
-    DDRA =  0x0;                                // data
+    DDRA = 0x0;                                 // data
     DDRD &= ~(_BV(PD2) | _BV(PD4) | _BV(PD6));  // MREQ, RD, WR
     
     set_MREQ();   // all control pins high, data = 0x0
@@ -54,6 +57,9 @@ void ram_write_buffer(uint16_t addr, uint16_t count)
     ram_bus_takeover(true);
     
     for (uint16_t i = 0; i < count; ++i) {
+#if RAM_DEBUG
+        uart_puthex_green(buffer[i]);
+#endif
         set_DATA(buffer[i]);
         addr_set(addr + i);
         clear_MREQ();
@@ -77,6 +83,9 @@ void ram_read_buffer(uint16_t addr, uint16_t count)
         clear_RD();
         WAIT();
         buffer[i] = get_DATA();
+#if RAM_DEBUG
+        uart_puthex_red(buffer[i]);
+#endif
         set_MREQ();
         set_RD();
         WAIT();

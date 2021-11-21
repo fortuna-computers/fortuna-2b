@@ -42,32 +42,43 @@ static bool test_buffer(uint16_t addr)
             initial_b = random_value();
     
     for (uint16_t i = 0; i < 256; ++i)
-        buffer[i] = initial_a + i;
+        buffer[i] = (initial_a + i) & 0xff;
     for (uint16_t i = 256; i < 512; ++i)
-        buffer[i] = initial_b + i;
+        buffer[i] = (initial_b + i) & 0xff;
     ram_write_buffer(addr, 512);
     
     buffer_clear();
     ram_read_buffer(addr, 512);
     
-    for (uint16_t i = 0; i < 256; ++i)
-        if (buffer[i] != initial_a + i)
-            return false;
-    for (uint16_t i = 256; i < 512; ++i)
-        if (buffer[i] != initial_b + i)
-            return false;
-        
-    return true;
+    int16_t err = -1;
+    for (uint16_t i = 0; i < 256; ++i) {
+        if (buffer[i] != ((initial_a + i) & 0xff)) {
+            err = i;
+            goto skip;
+        }
+    }
+    for (uint16_t i = 256; i < 512; ++i) {
+        if (buffer[i] != ((initial_b + i) & 0xff)) {
+            goto skip;
+        }
+    }
+    
+skip:
+    if (err != -1) {
+        uart_putchar('*');
+        uart_puthex16(err + addr);
+        return false;
+    } else {
+        return true;
+    }
 }
 
 static void post_ram(void)
 {
     uart_print_P(PSTR("RAM "));
-    if (test_buffer(0)) {
+    if (test_buffer(0) && test_buffer(0x7400) && test_buffer(0x8000) && test_buffer(0xfa00)) {
         print_ok();
     } else {
-        for (uint16_t i = 0; i < 512; ++i)
-            uart_puthex(buffer[i]);
         print_error_and_halt();
     }
 }

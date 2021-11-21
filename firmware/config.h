@@ -6,5 +6,6 @@
 #define POST_EXECUTE  1          // test components on initialization
 
 // #define RTC_DEBUG 1
+// #define RAM_DEBUG 1
 
 #endif
