@@ -3,7 +3,10 @@
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
 
+#include "config.h"
+
 #include "addr.h"
+#include "post.h"
 #include "random.h"
 #include "rtc.h"
 #include "uart.h"
@@ -11,24 +14,22 @@
 int main(void)
 {
     uart_init();
-    // uart_clrscr();
+#if CLEAR_SCR_ON_INIT
+    uart_clrscr();
+#endif
 
     random_init();
     addr_init();
-
     rtc_init();
-    /*
-    RTC_DateTime dt = { 21, 11, 20, 19, 47, 0 };
-    rtc_set_datetime(&dt);
-    */
-    rtc_print_datetime();
 
+#if POST_EXECUTE
+    post_execute();
+#endif
+    
     for (;;);
-
-    return 0;
 }
 
-/* catch bad interrupts */
+// catch bad interrupts
 ISR(BADISR_vect)
 {
     puts_P(PSTR("!!!"));

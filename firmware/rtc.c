@@ -3,8 +3,10 @@
 #include <util/twi.h>
 
 #include "config.h"
-#include "uart.h"
 #include "response.h"
+
+// region -> Low level stuff
+// {{{
 
 #define TW_READY  (TWCR & 0x80) // ready when TWINT returns to logic 1.
 
@@ -18,20 +20,14 @@
 #define MONTHS_REG  0x05
 #define YEARS_REG   0x06
 
-void rtc_init(void)
-{
-    TWSR = 0;                         // clear status register
-    TWBR = (F_CPU / F_SCL - 16) / 2;  // set I²C speed
-}
-
-static void rtc_wait_until_ready(void)
+static inline void rtc_wait_until_ready(void)
 {
     while (!(TWCR & _BV(TWINT)));
 }
 
-static uint8_t rtc_status(void)
+static inline uint8_t rtc_status(void)
 {
-#ifdef RTC_DEBUG
+#if RTC_DEBUG
     uart_puthex(TW_STATUS);
 #endif
     return TW_STATUS;
@@ -41,7 +37,7 @@ static uint8_t rtc_write(uint8_t value)
 {
     TWDR = value;
     TWCR = _BV(TWINT) | _BV(TWEN);  // communicate
-#ifdef RTC_DEBUG
+#if RTC_DEBUG
     uart_puthex_green(value);
 #endif
     rtc_wait_until_ready();
@@ -53,7 +49,7 @@ static uint8_t rtc_read(bool ack, uint8_t* data)
     TWCR = _BV(TWINT) | _BV(TWEN) | (ack ? _BV(TWEA) : 0);  // communicate
     rtc_wait_until_ready();
     *data = TWDR;
-#ifdef RTC_DEBUG
+#if RTC_DEBUG
     uart_puthex_red(*data);
 #endif
     return rtc_status();
@@ -82,29 +78,32 @@ static uint8_t to_bcd(uint8_t decvalue)
     return ((decvalue / 10) << 4) | (decvalue % 10);
 }
 
+#define RTC_START(rw, expected) { if (rtc_start(rw) != (expected)) return R_RTC_SLA_FAIL; }
+#define RTC_WRITE(byte) { if (rtc_write(byte) != TW_MT_DATA_ACK) return R_RTC_WRITE_FAIL; }
+#define RTC_READ(ack, ptr) { if (rtc_read(ack, ptr) != ((ack) ? TW_MR_DATA_ACK : TW_MR_DATA_NACK)) return R_RTC_READ_FAIL; }
+
+// }}}
+// endregion
+
+void rtc_init(void)
+{
+    TWSR = 0;                             // clear status register
+    TWBR = (F_CPU / I2C_SPEED - 16) / 2;  // set I²C speed
+}
+
 Response rtc_datetime(RTC_DateTime* dt)
 {
-    // send device ID, prepare for writing
-    if (rtc_start(TW_WRITE) != TW_MT_SLA_ACK)
-        return R_RTC_SLA_FAIL;
-    
-    // starting register
-    if (rtc_write(0x0) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    
-    // send device ID, prepare for reading
-    if (rtc_start(TW_READ) != TW_MR_SLA_ACK)
-        return R_RTC_SLA_FAIL;
-        
-    // read date
     uint8_t data[7];
-    for (int i = 0; i < 6; ++i) {
-        if (rtc_read(true, &data[i]) != TW_MR_DATA_ACK)
-            return R_RTC_READ_FAIL;
-    }
-
-    if (rtc_read(false, &data[6]) != TW_MR_DATA_NACK)
-        return R_RTC_READ_FAIL;
+    
+    // choose initial register
+    RTC_START(TW_WRITE, TW_MT_SLA_ACK)
+    RTC_WRITE(0x0)
+    
+    // read date
+    RTC_START(TW_READ, TW_MR_SLA_ACK)
+    for (int i = 0; i < 6; ++i)
+        RTC_READ(true, &data[i])
+    RTC_READ(false, &data[6])
 
     // stop communcation
     rtc_stop();
@@ -122,53 +121,21 @@ Response rtc_datetime(RTC_DateTime* dt)
 
 Response rtc_set_datetime(RTC_DateTime* dt)
 {
-    // send device ID, prepare for writing
-    if (rtc_start(TW_WRITE) != TW_MT_SLA_ACK)
-        return R_RTC_SLA_FAIL;
-    
-    // starting register
-    if (rtc_write(0x0) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
+    // choose initial register
+    RTC_START(TW_WRITE, TW_MT_SLA_ACK)
+    RTC_WRITE(0x0)
 
     // send date
-    if (rtc_write(to_bcd(dt->ss)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(dt->nn)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(dt->hh)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(1)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(dt->dd)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(dt->mm)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-    if (rtc_write(to_bcd(dt->yy)) != TW_MT_DATA_ACK)
-        return R_RTC_WRITE_FAIL;
-
+    RTC_WRITE(to_bcd(dt->ss))
+    RTC_WRITE(to_bcd(dt->nn))
+    RTC_WRITE(to_bcd(dt->hh))
+    RTC_WRITE(1)
+    RTC_WRITE(to_bcd(dt->dd))
+    RTC_WRITE(to_bcd(dt->mm))
+    RTC_WRITE(to_bcd(dt->yy))
+    
     // stop communcation
     rtc_stop();
     
     return R_OK;
 }
-
-void rtc_print_datetime(void)
-{
-    RTC_DateTime dt;
-    try(rtc_datetime(&dt));
-    uart_print_P(PSTR("RTC "));
-    uart_putdec(dt.hh, 2);
-    uart_putchar(':');
-    uart_putdec(dt.nn, 2);
-    uart_putchar(':');
-    uart_putdec(dt.ss, 2);
-    uart_putchar(' ');
-    uart_putdec(dt.mm, 1);
-    uart_putchar('/');
-    uart_putdec(dt.dd, 1);
-    uart_putchar('/');
-    uart_putdec(dt.yy, 2);
-    uart_putchar('\n');
-}
-
-// http://w8bh.net/avr/AvrDS1307.pdf
