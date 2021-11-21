@@ -32,7 +32,7 @@ static void ram_bus_takeover(bool for_writing)
     }
 }
 
-static void ram_bus_release()
+static void ram_bus_release(void)
 {
     addr_disable();
     DDRA =  0x0;                                // data

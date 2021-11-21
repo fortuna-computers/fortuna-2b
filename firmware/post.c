@@ -66,6 +66,8 @@ static void post_ram(void)
     if (test_buffer(0)) {
         print_ok();
     } else {
+        for (uint16_t i = 0; i < 512; ++i)
+            uart_puthex(buffer[i]);
         print_error_and_halt();
     }
 }
