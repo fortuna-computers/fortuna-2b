@@ -9,7 +9,7 @@
 - [X] POST
   - [X] Move print RTC to POST
 - [X] Build RAM board
-- [ ] RAM
+- [X] RAM
 - [ ] SDCard
 - [ ] Build main board
 - [ ] Z80 - regular execution
