@@ -5,7 +5,7 @@
 #include "rtc.h"
 #include "uart.h"
 
-static void post_rtc()
+static void post_rtc(void)
 {
     RTC_DateTime dt;
     try(rtc_datetime(&dt));
