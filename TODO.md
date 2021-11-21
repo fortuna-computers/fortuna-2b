@@ -4,7 +4,10 @@
 - [X] ADDR (high)
 - [X] ADDR (low)
 - [ ] RTC
+  - [ ] Fix "days"
+  - [ ] Improve code, return error instead of failing
 - [ ] POST
+  - [ ] Move print RTC to POST
 - [ ] Build RAM board
 - [ ] RAM
 - [ ] SDCard

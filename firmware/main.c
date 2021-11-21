@@ -17,6 +17,10 @@ int main(void)
     addr_init();
 
     rtc_init();
+    /*
+    RTC_DateTime dt = { 21, 11, 20, 19, 47, 0 };
+    rtc_set_datetime(&dt);
+    */
     rtc_print_datetime();
 
     for (;;);

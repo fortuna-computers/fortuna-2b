@@ -12,6 +12,7 @@ typedef struct RTC_DateTime {
 
 void     rtc_init(void);
 Response rtc_datetime(RTC_DateTime* dt);
+Response rtc_set_datetime(RTC_DateTime* dt);
 void     rtc_print_datetime(void);
 
 #endif
