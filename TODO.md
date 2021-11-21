@@ -3,12 +3,12 @@
 - [X] Random
 - [X] ADDR (high)
 - [X] ADDR (low)
-- [ ] RTC
-  - [ ] Fix "days"
-  - [ ] Improve code, return error instead of failing
-- [ ] POST
-  - [ ] Move print RTC to POST
-- [ ] Build RAM board
+- [X] RTC
+  - [X] Fix "days"
+  - [X] Improve code, return error instead of failing
+- [X] POST
+  - [X] Move print RTC to POST
+- [X] Build RAM board
 - [ ] RAM
 - [ ] SDCard
 - [ ] Build main board

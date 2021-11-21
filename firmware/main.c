@@ -11,6 +11,8 @@
 #include "rtc.h"
 #include "uart.h"
 
+uint8_t buffer[512] = { 0 };
+
 int main(void)
 {
     uart_init();
