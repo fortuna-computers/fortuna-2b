@@ -6,6 +6,7 @@
 #include "ram.h"
 #include "random.h"
 #include "rtc.h"
+#include "sdcard.h"
 #include "uart.h"
 
 static void print_ok(void) { uart_print_P(PSTR("OK\n")); }
@@ -85,8 +86,28 @@ static void post_ram(void)
 
 // endregion
 
+// region SDCARD
+
+static void post_sdcard(void)
+{
+    uart_print_P(PSTR("SDCARD "));
+    
+    try(sdcard_initialize());
+    try(sdcard_read_page(0));
+    
+    if (buffer[510] != 0x55 || buffer[511] != 0xaa) {
+        uart_print_P(PSTR("NOT BOOTABLE"));
+        for(;;);
+    }
+    
+    print_ok();
+}
+
+// endregion
+
 void post_execute(void)
 {
     post_rtc();
-    post_ram();
+    // post_ram();
+    post_sdcard();
 }

@@ -131,18 +131,18 @@ static bool initialize_once(void)
 // PUBLIC FUNCTIONS
 //
 
-bool sdcard_initialize(void)
+Response sdcard_initialize(void)
 {
     // will attempt to initialize 10 times
     for (size_t i = 0; i < 10; ++i) {
         if (initialize_once())
-            return true;
+            return R_OK;
         _delay_ms(80);
     }
-    return false;
+    return R_SDCARD_FAIL;
 }
 
-bool sdcard_read_page(uint32_t block)
+Response sdcard_read_page(uint32_t block)
 {
     spi_activate();
     
@@ -153,7 +153,7 @@ bool sdcard_read_page(uint32_t block)
     if (r != 0) {
         spi_deactivate();
         last_stage = SD_READ_REJECTED;
-        return false;
+        return R_SDCARD_FAIL;
     }
     
     // read data
@@ -168,7 +168,7 @@ bool sdcard_read_page(uint32_t block)
     // read timeout
     spi_deactivate();
     last_stage = SD_READ_TIMEOUT;
-    return false;
+    return R_SDCARD_FAIL;
 
 read_data:
     for (int i = 0; i < 512; ++i)
@@ -181,10 +181,10 @@ read_data:
     last_stage = SD_READ_OK;
     spi_deactivate();
     
-    return true;
+    return R_OK;
 }
 
-bool sdcard_write_page(uint32_t block)
+Response sdcard_write_page(uint32_t block)
 {
     spi_activate();
     
@@ -195,7 +195,7 @@ bool sdcard_write_page(uint32_t block)
     if (r != 0) {
         spi_deactivate();
         last_stage = SD_WRITE_REJECTED;
-        return false;
+        return R_SDCARD_FAIL;
     }
     
     // write data to card
@@ -215,14 +215,14 @@ bool sdcard_write_page(uint32_t block)
     // response timeout
     spi_deactivate();
     last_stage = SD_WRITE_TIMEOUT;
-    return false;
+    return R_SDCARD_FAIL;
 
 response_received:
     if ((rr & 0x1f) != 0x5) {
         spi_deactivate();
         last_response = rr;
         last_stage = SD_WRITE_DATA_REJECTED;
-        return false;
+        return R_SDCARD_FAIL;
     }
     
     // wait for write to finish
@@ -236,13 +236,13 @@ response_received:
     // response timeout
     spi_deactivate();
     last_stage = SD_WRITE_DATA_TIMEOUT;
-    return false;
+    return R_SDCARD_FAIL;
 
 response_data_received:
     last_stage = SD_WRITE_OK;
     spi_deactivate();
     
-    return true;
+    return R_OK;
 }
 
 SDCardStage sdcard_last_stage(void)

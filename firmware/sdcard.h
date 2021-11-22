@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "response.h"
+
 typedef enum {
     SD_RESET    = 0x1, SD_GO_IDLE = 0x2, SD_IF_COND = 0x3, SD_INIT = 0x4,
     SD_GET_OCR  = 0x10,
@@ -12,9 +14,9 @@ typedef enum {
     SD_NOT_INITIALIZED = 0xff,
 } SDCardStage;
 
-bool sdcard_initialize(void);
-bool sdcard_read_page(uint32_t block);
-bool sdcard_write_page(uint32_t block);
+Response sdcard_initialize(void);
+Response sdcard_read_page(uint32_t block);
+Response sdcard_write_page(uint32_t block);
 
 SDCardStage sdcard_last_stage(void);
 uint8_t     sdcard_last_response(void);

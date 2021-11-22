@@ -89,19 +89,19 @@ void uart_clrscr(void)
 
 static void uart_reset(void)
 {
-    uart_print_P(PSTR("\e[0m"));
+    uart_print_P(PSTR("\033[0m"));
 }
 
 void uart_puthex_red(uint8_t value)
 {
-    uart_print_P(PSTR("\e[0;31m"));
+    uart_print_P(PSTR("\033[0;31m"));
     uart_puthex(value);
     uart_reset();
 }
 
 void uart_puthex_green(uint8_t value)
 {
-    uart_print_P(PSTR("\e[0;32m"));
+    uart_print_P(PSTR("\033[0;32m"));
     uart_puthex(value);
     uart_reset();
 }
