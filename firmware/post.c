@@ -17,7 +17,14 @@ _Noreturn static void print_error_and_halt(void) { uart_print_P(PSTR("ERROR\n"))
 static void post_rtc(void)
 {
     RTC_DateTime dt;
-    try(rtc_datetime(&dt));
+    Response r;
+    for (uint8_t i = 0; i < 10; ++i) {
+        r = rtc_datetime(&dt);
+        if (r == R_OK)
+            break;
+    }
+    try(r);
+
     uart_print_P(PSTR("RTC "));
     uart_putdec(dt.hh, 2);
     uart_putchar(':');

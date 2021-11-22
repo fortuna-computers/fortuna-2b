@@ -26,10 +26,6 @@ int main(void)
     ram_init();
     spi_init();
     
-    for (uint8_t i = 0; i < 200; ++i)
-        uart_puthex(random_value());
-    uart_putchar('\n');
-
 #if POST_EXECUTE
     post_execute();
 #endif
