@@ -1,22 +1,21 @@
 #include "random.h"
 
-#include <stdlib.h>
-
 #include <avr/eeprom.h>
 
-#define EEPROM_BYTE ((uint8_t *) 511)
+#define EEPROM_SEED ((uint32_t *) 127)
 
-static uint8_t seed;
+static uint32_t seed;
 
 void random_init(void)
 {
-    uint8_t r = eeprom_read_byte(EEPROM_BYTE);
-    seed = r;
-    eeprom_update_byte(EEPROM_BYTE, r + 1);
+    seed = eeprom_read_dword(EEPROM_SEED);
+    eeprom_update_dword(EEPROM_SEED, seed + 1);
 }
 
 uint8_t random_value(void)
 {
-    seed = (uint8_t) (((uint32_t) seed) * 89 + 207);
-    return seed;
+    seed ^= seed << 13;
+    seed ^= seed >> 17;
+    seed ^= seed << 5;
+    return (uint8_t) seed;
 }
