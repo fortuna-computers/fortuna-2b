@@ -11,6 +11,7 @@
 - [X] Build RAM board
 - [X] RAM
 - [X] SDCard
+- [X] Improve randomness
 - [ ] Build main board
 - [ ] Z80 - regular execution
 - [ ] Z80 - I/O

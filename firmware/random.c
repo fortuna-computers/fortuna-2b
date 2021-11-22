@@ -2,6 +2,8 @@
 
 #include <avr/eeprom.h>
 
+#include "uart.h"
+
 #define EEPROM_SEED ((uint32_t *) 127)
 
 static uint32_t seed;
@@ -9,6 +11,7 @@ static uint32_t seed;
 void random_init(void)
 {
     seed = eeprom_read_dword(EEPROM_SEED);
+    random_value();
     eeprom_update_dword(EEPROM_SEED, seed + 1);
 }
 

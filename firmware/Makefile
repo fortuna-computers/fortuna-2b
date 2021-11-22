@@ -8,8 +8,9 @@ OBJECTS=main.o buffer.o response.o uart.o random.o addr.o rtc.o post.o ram.o sdc
 # Can be one of: pi_rst, pi_cs0, pi_cs1 or pi_gpio, depending on the RESET line in AVR.
 AVRDUDE_CONFIG=pi_rst
 
-# AVR fuses: external crystal, don't erase EEPROM (see https://www.engbedded.com/fusecalc/)
-FUSES=-U lfuse:w:0xff:m -U hfuse:w:0xd1:m
+# AVR fuses: external crystal (see https://www.engbedded.com/fusecalc/)
+FUSES=-U lfuse:w:0xff:m -U hfuse:w:0xd1:m   # don't erase EEPROM
+# FUSES=-U lfuse:w:0xff:m -U hfuse:w:0xd9:m   # erase EEPROM
 
 # Microcontroller
 MCU_GCC=atmega16
