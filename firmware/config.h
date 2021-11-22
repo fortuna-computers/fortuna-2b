@@ -7,5 +7,6 @@
 
 // #define RTC_DEBUG 1
 // #define RAM_DEBUG 1
+// #define SPI_DEBUG 1
 
 #endif

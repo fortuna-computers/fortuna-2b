@@ -1,7 +1,11 @@
 #include "spi.h"
 
+#include <avr/pgmspace.h>
 #include <avr/io.h>
 #include <util/delay.h>
+
+#include "config.h"
+#include "uart.h"
 
 void spi_init(void)
 {
@@ -14,11 +18,17 @@ void spi_init(void)
 
 void spi_activate(void)
 {
+#if SPI_DEBUG
+    uart_print_P(PSTR("on "));
+#endif
     PORTB &= ~(1 << PB4);
 }
 
 void spi_deactivate(void)
 {
+#if SPI_DEBUG
+    uart_print_P(PSTR("off "));
+#endif
     PORTB |= (1 << PB4);
 }
 
@@ -27,12 +37,24 @@ uint8_t spi_send(uint8_t byte)
     SPDR = byte;
     while (!(SPSR & (1 << SPIF)));
     uint8_t r = SPDR;
+#if SPI_DEBUG
+    if (byte != 0xff) {
+        uart_puthex_green(byte);
+        if (r != 0xff)
+            uart_puthex_red(r);
+    }
+#endif
     return r;
 }
 
 uint8_t spi_recv(void)
 {
-    return spi_send(0xff);
+    uint8_t r = spi_send(0xff);
+#if SPI_DEBUG
+    if (r != 0xff)
+        uart_puthex_red(r);
+#endif
+    return r;
 }
 
 uint8_t spi_recv_ignore_ff(void)

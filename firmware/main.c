@@ -10,6 +10,7 @@
 #include "random.h"
 #include "ram.h"
 #include "rtc.h"
+#include "spi.h"
 #include "uart.h"
 
 int main(void)
@@ -23,6 +24,7 @@ int main(void)
     addr_init();
     rtc_init();
     ram_init();
+    spi_init();
 
 #if POST_EXECUTE
     post_execute();

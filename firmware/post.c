@@ -108,6 +108,6 @@ static void post_sdcard(void)
 void post_execute(void)
 {
     post_rtc();
-    // post_ram();
     post_sdcard();
+    post_ram();
 }

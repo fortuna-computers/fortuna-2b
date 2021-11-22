@@ -7,6 +7,7 @@
 
 #include "ram.h"
 #include "spi.h"
+#include "uart.h"
 
 #define CMD0   0
 #define CMD8   8
