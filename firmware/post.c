@@ -134,10 +134,12 @@ static void post_z80(void)
     _delay_ms(50);
     z80_powerdown();
     
+    ram_dump(0, 0x20);
+    
     // check if the memory position was set correctly
-    ram_read_buffer(0x0, 512);
-    if (buffer[0x11f] != expected_byte) {
-        uart_puthex(buffer[0x11f]);
+    ram_read_buffer(0x0, 0x20);
+    if (buffer[0x1f] != expected_byte) {
+        uart_puthex(buffer[0x1f]);
         print_error_and_halt();
     }
     
