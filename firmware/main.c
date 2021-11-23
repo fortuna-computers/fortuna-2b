@@ -25,7 +25,7 @@ int main(void)
     rtc_init();
     ram_init();
     spi_init();
-    
+
 #if POST_EXECUTE
     post_execute();
 #endif
