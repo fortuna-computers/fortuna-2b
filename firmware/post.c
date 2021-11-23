@@ -1,6 +1,7 @@
 #include "post.h"
 
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 #include "buffer.h"
 #include "ram.h"
@@ -8,6 +9,7 @@
 #include "rtc.h"
 #include "sdcard.h"
 #include "uart.h"
+#include "z80.h"
 
 static void print_ok(void) { uart_print_P(PSTR("OK\n")); }
 _Noreturn static void print_error_and_halt(void) { uart_print_P(PSTR("ERROR\n")); for(;;); }
@@ -122,8 +124,24 @@ static void post_z80(void)
     
     uint8_t expected_byte = random_value();
     
-    uart_puthex(sizeof post1_bin);
-    // memcpy_P((void*) buffer, post1_bin, sizeof post1_bin);
+    // load executable code into RAM, and replace expected value
+    memcpy_P((void*) buffer, post1_bin, sizeof post1_bin);
+    buffer[1] = expected_byte;
+    ram_write_buffer(0, sizeof post1_bin);
+    
+    // run code for a few milliseconds
+    z80_powerup();
+    _delay_ms(50);
+    z80_powerdown();
+    
+    // check if the memory position was set correctly
+    ram_read_buffer(0x1f, 1);
+    if (buffer[0] != expected_byte) {
+        uart_puthex(buffer[0]);
+        print_error_and_halt();
+    }
+    
+    print_ok();
 }
 
 // endregion

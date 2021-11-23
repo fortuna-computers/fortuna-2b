@@ -52,7 +52,16 @@ void z80_init(uint16_t speed_khz)
     _delay_ms(50);
 }
 
+void z80_powerdown(void)
+{
+    clear_RST();
+}
+
 void z80_powerup(void)
 {
+    set_BUSRQ();
+    set_WAITST();
+    set_INT();
+    set_NMI();
     set_RST();
 }
