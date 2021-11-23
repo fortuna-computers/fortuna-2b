@@ -93,7 +93,7 @@ static void post_ram(void)
 
 // endregion
 
-// region SDCARD
+// region -> SDCARD
 
 static void post_sdcard(void)
 {
@@ -112,9 +112,26 @@ static void post_sdcard(void)
 
 // endregion
 
+// region -> Z80
+
+#include "post1.inc"
+
+static void post_z80(void)
+{
+    uart_print_P(PSTR("CPU "));
+    
+    uint8_t expected_byte = random_value();
+    
+    uart_puthex(sizeof post1_bin);
+    // memcpy_P((void*) buffer, post1_bin, sizeof post1_bin);
+}
+
+// endregion
+
 void post_execute(void)
 {
     post_rtc();
     post_sdcard();
     post_ram();
+    post_z80();
 }

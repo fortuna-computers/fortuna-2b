@@ -50,7 +50,8 @@ post.c: post1.inc
 	vasmz80_oldstyle -Fbin -o $(basename $<).bin $<
 	xxd -i $(basename $<).bin > $@
 	rm $(basename $<).bin
-	sed -i 's/unsigned char \(\w\+\)/static uint8_t \1 PROGMEM/g' $@
+	sed -i 's/unsigned char \(\w\+\[\]\)/static const uint8_t \1 PROGMEM/g' $@
+	sed -i 's/unsigned int.*//g' $@
 
 test-connection:
 	sudo avrdude ${AVRDUDE_FLAGS}
@@ -71,5 +72,8 @@ talk:
 
 clean:
 	rm -f ${OBJECTS} ${PROJECT}.elf ${PROJECT}.hex
+
+dist-clean: clean
+	rm *.inc
 
 # vim: set ts=8 sts=8 sw=8 noexpandtab:
