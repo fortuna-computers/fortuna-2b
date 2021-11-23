@@ -2,7 +2,7 @@ TARGET_ADDR = 0x1f      ; memory position that will be checked
 EXPECTED = 0x0          ; the expected value will be replaced by a random value during POST
 
     ld      a, EXPECTED
-    ld      hl, 0x1f
+    ld      hl, 0x11f
     ld      (hl), a
 done:
     jr      done
