@@ -2,7 +2,7 @@
 PROJECT=fortuna-io
 
 # Object files (one for each source file)
-OBJECTS=main.o buffer.o response.o uart.o random.o addr.o rtc.o post.o ram.o sdcard.o spi.o
+OBJECTS=main.o buffer.o response.o uart.o random.o addr.o rtc.o post.o ram.o sdcard.o spi.o z80.o
 
 # Avrdude configuration to connect on the PI. See avrdude_gpio.conf.
 # Can be one of: pi_rst, pi_cs0, pi_cs1 or pi_gpio, depending on the RESET line in AVR.

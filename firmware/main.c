@@ -12,6 +12,7 @@
 #include "rtc.h"
 #include "spi.h"
 #include "uart.h"
+#include "z80.h"
 
 int main(void)
 {
@@ -25,10 +26,13 @@ int main(void)
     rtc_init();
     ram_init();
     spi_init();
+    z80_init(Z80_SPEED_KHZ);
 
 #if POST_EXECUTE
     post_execute();
 #endif
+    
+    // z80_powerup();
     
     for (;;);
 }
