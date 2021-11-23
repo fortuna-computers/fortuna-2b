@@ -42,7 +42,15 @@ ${PROJECT}.hex: ${PROJECT}.elf
 
 ${PROJECT}.elf: ${OBJECTS}
 	$(CC) -mmcu=${MCU_GCC} -o $@ $^ -Wl,--gc-sections
-	avr-size -C --mcu=${MCU_GCC} ${PROJECT}.elf	
+	avr-size -C --mcu=${MCU_GCC} ${PROJECT}.elf
+
+post.c: post1.inc
+
+%.inc: %.z80
+	vasmz80_oldstyle -Fbin -o $(basename $<).bin $<
+	xxd -i $(basename $<).bin > $@
+	rm $(basename $<).bin
+	sed -i 's/unsigned char \(\w\+\)/static uint8_t \1 PROGMEM/g' $@
 
 test-connection:
 	sudo avrdude ${AVRDUDE_FLAGS}
