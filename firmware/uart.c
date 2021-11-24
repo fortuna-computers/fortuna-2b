@@ -105,3 +105,9 @@ void uart_puthex_green(uint8_t value)
     uart_puthex(value);
     uart_reset();
 }
+
+void uart_wait_for_enter(void)
+{
+    while (uart_getchar() != '\r');
+    uart_putchar('\n');
+}
