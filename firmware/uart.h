@@ -19,4 +19,6 @@ void    uart_clrscr(void);
 void    uart_puthex_red(uint8_t value);
 void    uart_puthex_green(uint8_t value);
 
+void    uart_wait_for_enter(void);
+
 #endif

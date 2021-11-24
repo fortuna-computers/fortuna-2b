@@ -130,9 +130,21 @@ static void post_z80(void)
     ram_write_buffer(0, sizeof post1_bin);
     
     // run code for a few milliseconds
+    z80_powerup(false);
+    for (uint16_t i = 0; i < 50; ++i) {
+        uart_print_P(PSTR("Cycle "));
+        uart_putdec(i, 2);
+        uart_putchar('?');
+        uart_wait_for_enter();
+        uart_putchar('\n');
+    }
+    z80_powerdown();
+    
+    /*
     z80_powerup();
     _delay_ms(50);
     z80_powerdown();
+     */
     
     ram_dump(0, 0x20);
     
