@@ -128,10 +128,14 @@ static void post_z80(void)
     memcpy_P((void*) buffer, post1_bin, sizeof post1_bin);
     buffer[1] = expected_byte;
     ram_write_buffer(0, sizeof post1_bin);
+
+    ram_dump(0, 0x20);
     
     // run code for a few milliseconds
     z80_powerup(false);
+    z80_single_cycle();
     for (uint16_t i = 0; i < 50; ++i) {
+        z80_single_cycle();
         uart_print_P(PSTR("Cycle "));
         uart_putdec(i, 2);
         uart_putchar('?');
@@ -145,8 +149,6 @@ static void post_z80(void)
     _delay_ms(50);
     z80_powerdown();
      */
-    
-    ram_dump(0, 0x20);
     
     // check if the memory position was set correctly
     ram_read_buffer(0x0, 0x20);
@@ -162,8 +164,8 @@ static void post_z80(void)
 
 void post_execute(void)
 {
-    post_rtc();
-    post_sdcard();
-    post_ram();
+    // post_rtc();
+    // post_sdcard();
+    // post_ram();
     post_z80();
 }

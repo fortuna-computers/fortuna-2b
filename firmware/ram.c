@@ -5,6 +5,7 @@
 #include <avr/cpufunc.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <string.h>
 
 #include "addr.h"
 #include "buffer.h"
@@ -81,6 +82,11 @@ void ram_read_buffer(uint16_t addr, uint16_t count)
         addr_set(addr + i);
         clear_MREQ();
         clear_RD();
+
+            uart_putdec(addr + i, 2);
+            uart_putchar('#');
+            uart_wait_for_enter();
+        
         WAIT();
         buffer[i] = get_DATA();
 #if RAM_DEBUG
@@ -96,9 +102,11 @@ void ram_read_buffer(uint16_t addr, uint16_t count)
 
 void ram_dump(uint16_t addr, uint16_t until)
 {
+    memset((void *) buffer, 0, 512);
     ram_read_buffer(addr, until);
     
     for (uint16_t i = 0; i < until; ++i)
         uart_puthex(buffer[i]);
+
     uart_putchar('\n');
 }
