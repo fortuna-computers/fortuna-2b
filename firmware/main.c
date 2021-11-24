@@ -21,12 +21,17 @@ int main(void)
     uart_clrscr();
 #endif
 
+    z80_init(Z80_SPEED_KHZ);
     random_init();
     addr_init();
+    
+    addr_set(0b11001100);
+    addr_set(0b11001100);
+    for (;;); 
+
     rtc_init();
     ram_init();
     spi_init();
-    z80_init(Z80_SPEED_KHZ);
 
 #if POST_EXECUTE
     post_execute();
