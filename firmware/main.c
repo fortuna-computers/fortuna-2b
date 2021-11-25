@@ -22,11 +22,12 @@ int main(void)
 #endif
 
     random_init();
+
+    z80_init(Z80_SPEED_KHZ);
     addr_init();
     rtc_init();
     ram_init();
     spi_init();
-    z80_init(Z80_SPEED_KHZ);
 
 #if POST_EXECUTE
     post_execute();
