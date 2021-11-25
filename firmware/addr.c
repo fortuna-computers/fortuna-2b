@@ -37,23 +37,11 @@ void addr_set(uint16_t addr)
     // disable 595 output
     set_OE();
 
-    clear_SER_L();
-    clear_SER_H();
-    for (int i = 0; i < 9; ++i) {   // clear 595
-        clear_SRCLK();
-        set_SRCLK();
-    }
-    clear_RCLK();
-    set_RCLK();
+    set_SRCLK();
+    clear_SRCLK();
 
     // additional clock cycle
     for (int i = 0; i < 8; ++i) {
-
-        /*
-        uart_puthex((addr >> i) & 1);
-        uart_putchar('?');
-        uart_wait_for_enter();
-        */
 
         // set low ADDR
         if ((addr >> i) & 1)
@@ -75,41 +63,6 @@ void addr_set(uint16_t addr)
     clear_RCLK();
     set_RCLK();
     clear_OE();
-
-    /*
-    // disable 595
-    PORTC |= _BV(OE);
-
-    uint8_t portc = PORTC & 0b11100011;  // bytes to keep
-
-    for (int i = 0; i < 8; ++i) {
-
-        uart_puthex((addr >> i) & 1);
-
-        // set SER_L
-        if ((addr >> i) & 1)
-            portc |= _BV(SER_L);
-        else
-            portc &= ~_BV(SER_L);
-
-        // set SER_H
-        if ((addr >> (i + 8)) & 1)
-            portc |= _BV(SER_H);
-        else
-            portc &= ~_BV(SER_H);
-        
-        // 595 cycle
-        PORTC = portc;
-        PORTC |= _BV(SRCLK);
-    }
-
-    // extra CYCLE because RCLK and SRCLK are connected, so RCLK is one cycle behind
-    PORTC &= ~_BV(SRCLK);
-    PORTC |= _BV(SRCLK);
-
-    // enable 595
-    PORTC &= ~_BV(OE);
-    */
 }
 
 void addr_disable(void)

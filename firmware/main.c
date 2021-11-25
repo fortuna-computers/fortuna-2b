@@ -2,6 +2,7 @@
 
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 #include "config.h"
 
@@ -25,8 +26,8 @@ int main(void)
     random_init();
     addr_init();
     
-    addr_set(0b11001100);
-    addr_set(0b11001100);
+    addr_set(0xff);
+    addr_set(0x0f);
     for (;;); 
 
     rtc_init();
