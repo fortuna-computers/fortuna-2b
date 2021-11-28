@@ -34,7 +34,7 @@ int main(void)
     sdcard_init();
 
     /*
-    RTC_DateTime dt = { 21, 11, 27, 17, 56, 0 };
+    RTC_DateTime dt = { 21, 11, 28, 18, 28, 0 };
     rtc_set_datetime(&dt);
     */
 
