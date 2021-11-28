@@ -2,6 +2,7 @@
 
 #include <avr/interrupt.h>
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 
 #include "config.h"
 
@@ -23,11 +24,18 @@ int main(void)
 
     random_init();
 
-    z80_init(Z80_SPEED_KHZ);
+    // z80_init(Z80_SPEED_KHZ);
+
     addr_init();
+
     rtc_init();
     ram_init();
     spi_init();
+
+    /*
+    RTC_DateTime dt = { 21, 11, 27, 17, 56, 0 };
+    rtc_set_datetime(&dt);
+    */
 
 #if POST_EXECUTE
     post_execute();

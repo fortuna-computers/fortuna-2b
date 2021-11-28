@@ -1,5 +1,6 @@
 #include "addr.h"
 
+#include <avr/cpufunc.h>
 #include <avr/io.h>
 #include <util/delay.h>
 
@@ -41,7 +42,8 @@ void addr_set(uint16_t addr)
     clear_SRCLK();
 
     // additional clock cycle
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 7; i >= 0; --i) {
+    // for (int i = 1; i < 8; ++i) {
 
         // set low ADDR
         if ((addr >> i) & 1)

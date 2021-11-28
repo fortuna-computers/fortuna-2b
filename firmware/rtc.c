@@ -87,7 +87,7 @@ static uint8_t to_bcd(uint8_t decvalue)
 
 void rtc_init(void)
 {
-    TWSR = 0;                             // clear status register
+    TWSR = 0;                                 // clear status register
     TWBR = (F_CPU / I2C_SPEED_KHZ - 16) / 2;  // set I²C speed
 }
 

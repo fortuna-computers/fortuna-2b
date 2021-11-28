@@ -21,11 +21,18 @@
 
 void z80_init(uint16_t speed_khz)
 {
-    // output: BUSRQ, RST, WAITST
-    DDRB |= _BV(DDB0) | _BV(DDB2) | _BV(DDB3);
-    
-    // output: CLK
-    DDRD |= _BV(DDD5);
+    // reset CPU
+    DDRB |= _BV(DDB2);  // RST
+    DDRD |= _BV(DDD5);  // CLK
+    clear_RST();
+    for (int i = 0; i < 50; ++i) {
+        set_CLK();
+        clear_CLK();
+    }
+
+    /*
+    // output: BUSRQ, WAITST
+    DDRB |= _BV(DDB0) | _BV(DDB3);
     
     // output: INT, NMI
     DDRC |= _BV(DDC6) | _BV(DDC7);
@@ -37,7 +44,6 @@ void z80_init(uint16_t speed_khz)
     DDRD &= ~_BV(DDD3);
     
     // set pins to initial configuration
-    clear_RST();
     set_BUSRQ();
     set_WAITST();
     set_INT();
@@ -47,9 +53,7 @@ void z80_init(uint16_t speed_khz)
     OCR1A = F_CPU / (2UL * (unsigned long) speed_khz * 1000UL) - 1UL;  // calculate speed
     TCCR1A = (1 << COM1A0);                  // Toggle OC1A/OC1B on compare match
     TCCR1B = (1 << WGM12) | (1 << CS10);     // CTC mode, top OCR1A, no prescaling (clk/1)
-    
-    // run some cycles
-    _delay_ms(50);
+    */   
 }
 
 void z80_powerdown(void)

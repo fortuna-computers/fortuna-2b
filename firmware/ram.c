@@ -19,7 +19,7 @@
 #define clear_RD()    PORTD &= ~(1 << PD4)
 #define set_DATA(n)   PORTA = (n)
 #define get_DATA()    PINA
-#define WAIT()        { _NOP(); _NOP(); }
+#define WAIT()        { _NOP(); _NOP(); _NOP(); }
 
 static void ram_bus_takeover(bool for_writing)
 {
@@ -50,11 +50,19 @@ static void ram_bus_release(void)
 void ram_init(void)
 {
     ram_bus_release();
+    ram_read_buffer(0, 16);
+    ram_write_buffer(0, 16);
 }
 
 void ram_write_buffer(uint16_t addr, uint16_t count)
 {
     ram_bus_takeover(true);
+
+#if RAM_DEBUG
+    uart_putchar('\n');
+    uart_puthex16(addr);
+    uart_putchar('\n');
+#endif
     
     for (uint16_t i = 0; i < count; ++i) {
 #if RAM_DEBUG
@@ -76,6 +84,12 @@ void ram_write_buffer(uint16_t addr, uint16_t count)
 void ram_read_buffer(uint16_t addr, uint16_t count)
 {
     ram_bus_takeover(false);
+    
+#if RAM_DEBUG
+    uart_putchar('\n');
+    uart_puthex16(addr);
+    uart_putchar('\n');
+#endif
     
     for (uint16_t i = 0; i < count; ++i) {
         addr_set(addr + i);

@@ -137,6 +137,7 @@ static void post_z80(void)
     ram_dump(0, 0x20);
     
     // check if the memory position was set correctly
+    _delay_ms(50);
     ram_read_buffer(0x0, 0x20);
     if (buffer[0x1f] != expected_byte) {
         uart_puthex(buffer[0x1f]);
@@ -153,5 +154,5 @@ void post_execute(void)
     post_rtc();
     post_sdcard();
     post_ram();
-    post_z80();
+    // post_z80();
 }
