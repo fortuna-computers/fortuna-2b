@@ -131,10 +131,8 @@ static void post_z80(void)
     
     // run code for a few milliseconds
     z80_powerup();
-    _delay_ms(50);
+    _delay_ms(20);
     z80_powerdown();
-    
-    ram_dump(0, 0x20);
     
     // check if the memory position was set correctly
     _delay_ms(50);
@@ -154,5 +152,5 @@ void post_execute(void)
     post_rtc();
     post_sdcard();
     post_ram();
-    // post_z80();
+    post_z80();
 }

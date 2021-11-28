@@ -108,6 +108,7 @@ void uart_puthex_green(uint8_t value)
 
 void uart_wait_for_enter(void)
 {
+    uart_print_P(PSTR("? "));
     while (uart_getchar() != '\r');
     uart_putchar('\n');
 }

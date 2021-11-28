@@ -14,6 +14,7 @@ typedef enum {
     SD_NOT_INITIALIZED = 0xff,
 } SDCardStage;
 
+void     sdcard_init(void);
 Response sdcard_initialize(void);
 Response sdcard_read_page(uint32_t block);
 Response sdcard_write_page(uint32_t block);

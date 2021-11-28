@@ -25,12 +25,9 @@ void z80_init(uint16_t speed_khz)
     DDRB |= _BV(DDB2);  // RST
     DDRD |= _BV(DDD5);  // CLK
     clear_RST();
-    for (int i = 0; i < 50; ++i) {
-        set_CLK();
-        clear_CLK();
-    }
+    for (int i = 0; i < 50; ++i)
+        z80_cycle();
 
-    /*
     // output: BUSRQ, WAITST
     DDRB |= _BV(DDB0) | _BV(DDB3);
     
@@ -53,7 +50,6 @@ void z80_init(uint16_t speed_khz)
     OCR1A = F_CPU / (2UL * (unsigned long) speed_khz * 1000UL) - 1UL;  // calculate speed
     TCCR1A = (1 << COM1A0);                  // Toggle OC1A/OC1B on compare match
     TCCR1B = (1 << WGM12) | (1 << CS10);     // CTC mode, top OCR1A, no prescaling (clk/1)
-    */   
 }
 
 void z80_powerdown(void)
@@ -68,4 +64,10 @@ void z80_powerup(void)
     set_INT();
     set_NMI();
     set_RST();
+}
+
+void z80_cycle(void)
+{
+    set_CLK();
+    clear_CLK();
 }

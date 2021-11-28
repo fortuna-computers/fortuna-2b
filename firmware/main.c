@@ -11,6 +11,7 @@
 #include "random.h"
 #include "ram.h"
 #include "rtc.h"
+#include "sdcard.h"
 #include "spi.h"
 #include "uart.h"
 #include "z80.h"
@@ -24,13 +25,13 @@ int main(void)
 
     random_init();
 
-    // z80_init(Z80_SPEED_KHZ);
+    z80_init(Z80_SPEED_KHZ);
 
     addr_init();
-
     rtc_init();
     ram_init();
     spi_init();
+    sdcard_init();
 
     /*
     RTC_DateTime dt = { 21, 11, 27, 17, 56, 0 };

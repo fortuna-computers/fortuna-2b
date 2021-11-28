@@ -9,27 +9,11 @@
 
 void spi_init(void)
 {
-    DDRB |= (1 << PB4) | (1 << PB5) | (1 << PB7);   // MOSI, SCK, SD_CS: output
-    DDRB &= ~(1 << PB6);  // MISO: input
+    DDRB |= (1 << DDB5) | (1 << DDB7);   // MOSI, SCK: output
+    DDRB &= ~(1 << DDB6);  // MISO: input
     
     // enable SPI, set as MASTER, clock to fosc/128 (TODO - can it go faster?)
     SPCR = (1 << SPE) | (1 << MSTR) | (1 << SPR1) | (1 << SPR0);
-}
-
-void spi_activate(void)
-{
-#if SPI_DEBUG
-    uart_print_P(PSTR("on "));
-#endif
-    PORTB &= ~(1 << PB4);
-}
-
-void spi_deactivate(void)
-{
-#if SPI_DEBUG
-    uart_print_P(PSTR("off "));
-#endif
-    PORTB |= (1 << PB4);
 }
 
 uint8_t spi_send(uint8_t byte)
