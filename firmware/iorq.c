@@ -39,51 +39,48 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
     memcpy(&reg, (const void *) buffer, sizeof(IO_Registers));
     
     switch (cmd) {
-        /*
-        case I_UART_RECV:
+        case I_LAST_KEYPRESS:
             buffer[0] = uart_last_pressed_key();
-            return 1;
-        case I_UART_SEND:
-            ram_read_buffer(DATA_EXCHANGE_AREA, 1);
+            ram_write_buffer(reg.I_DEST, 1);
+            break;
+        case I_PRINT:
+            ram_read_buffer(reg.I_ORIG, 1);
             uart_putchar((char) buffer[0]);
-            return 0;
-        
+            break;
+            
         case I_SDCARD_RAW_READ:
-            ram_read_buffer(DATA_EXCHANGE_AREA, 4);
-            sdcard_read_page(*(uint32_t *) &buffer[0]);
-            return 512;
-        case I_SDCARD_SET_WPAGE:
-            ram_read_buffer(DATA_EXCHANGE_AREA, 4);
-            sdcard_wpage = *(uint32_t *) &buffer[0];
-            return 0;
+            sdcard_read_page(reg.I_SD_BLOCK);
+            ram_write_buffer(reg.I_DEST, 512);
+            break;
         case I_SDCARD_RAW_WRITE:
-            sdcard_write_page(sdcard_wpage);
-            return 0;
-        
-        case I_SDCARD_RANDOM:
-            *(uint32_t *) buffer = random_value();
-            return 4;
-        
-        case I_SDCARD_MEMCPY:
+            ram_read_buffer(reg.I_ORIG, 512);
+            sdcard_write_page(reg.I_SD_BLOCK);
+            break;
+            
+        case I_RANDOM: {
+            uint32_t r = random_value();
+            memcpy((void *) buffer, &r, reg.I_SZ);
+            break;
+        }
+    
+        case I_MEMCPY:
             break;  // TODO
-        
-        case I_SDCARD_RTC_GET: {
+            
+        case I_RTC_GET: {
             RTC_DateTime dt;
             rtc_datetime(&dt);
-            buffer[0] = dt.yy;
-            buffer[1] = dt.mm;
-            buffer[2] = dt.dd;
-            buffer[3] = dt.hh;
-            buffer[4] = dt.nn;
-            buffer[5] = dt.ss;
-            return 6;
+            memcpy((void *) buffer, &dt, sizeof(RTC_DateTime));
+            ram_write_buffer(reg.I_DEST, sizeof(RTC_DateTime));
+            break;
         }
-        case I_SDCARD_RTC_SET: {
-            RTC_DateTime dt = { buffer[0], buffer[1], buffer[2], buffer[3], buffer[4], buffer[5] };
+        
+        case I_RTC_SET: {
+            RTC_DateTime dt;
+            ram_read_buffer(reg.I_ORIG, sizeof(RTC_DateTime));
+            memcpy(&dt, (const void *) buffer, sizeof(RTC_DateTime));
             rtc_set_datetime(&dt);
-            return 0;
+            break;
         }
-        */
         
         case I_POST_TEST:
             buffer[0] = post_byte;
