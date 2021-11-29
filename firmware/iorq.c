@@ -13,7 +13,7 @@ void iorq_init(void)
 
 uint8_t iorq_input(uint8_t cmd)
 {
-    return 0;
+    return 0xf0;
 }
 
 void iorq_output(uint8_t cmd, uint8_t data)
