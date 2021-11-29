@@ -20,6 +20,7 @@ typedef struct __attribute__((packed)) IO_Registers {
 } IO_Registers;
 
 #define IO_REGISTERS_ADDR 0x100
+#define IO_LAST_STATUS    0x10a
 
 void iorq_init(void)
 {
@@ -38,6 +39,8 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
     ram_read_buffer(IO_REGISTERS_ADDR, sizeof(IO_Registers));
     memcpy(&reg, (const void *) buffer, sizeof(IO_Registers));
     
+    Response last_status = R_OK;
+    
     switch (cmd) {
         case I_LAST_KEYPRESS:
             buffer[0] = uart_last_pressed_key();
@@ -49,12 +52,13 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
             break;
             
         case I_SDCARD_RAW_READ:
-            sdcard_read_page(reg.I_SD_BLOCK);
-            ram_write_buffer(reg.I_DEST, 512);
+            last_status = sdcard_read_page(reg.I_SD_BLOCK);
+            if (last_status == R_OK)
+                ram_write_buffer(reg.I_DEST, 512);
             break;
         case I_SDCARD_RAW_WRITE:
             ram_read_buffer(reg.I_ORIG, 512);
-            sdcard_write_page(reg.I_SD_BLOCK);
+            last_status = sdcard_write_page(reg.I_SD_BLOCK);
             break;
             
         case I_RANDOM: {
@@ -68,9 +72,11 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
             
         case I_RTC_GET: {
             RTC_DateTime dt;
-            rtc_datetime(&dt);
-            memcpy((void *) buffer, &dt, sizeof(RTC_DateTime));
-            ram_write_buffer(reg.I_DEST, sizeof(RTC_DateTime));
+            last_status = rtc_datetime(&dt);
+            if (last_status == R_OK) {
+                memcpy((void *) buffer, &dt, sizeof(RTC_DateTime));
+                ram_write_buffer(reg.I_DEST, sizeof(RTC_DateTime));
+            }
             break;
         }
         
@@ -78,7 +84,7 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
             RTC_DateTime dt;
             ram_read_buffer(reg.I_ORIG, sizeof(RTC_DateTime));
             memcpy(&dt, (const void *) buffer, sizeof(RTC_DateTime));
-            rtc_set_datetime(&dt);
+            last_status = rtc_set_datetime(&dt);
             break;
         }
         
@@ -87,4 +93,7 @@ void iorq_output(uint8_t cmd)    // returns bytes affected
             ram_write_buffer(reg.I_DEST, 1);
             break;
     }
+    
+    buffer[0] = last_status;
+    ram_write_buffer(IO_LAST_STATUS, 1);
 }
