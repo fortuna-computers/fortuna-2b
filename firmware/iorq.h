@@ -11,7 +11,7 @@ typedef enum IORQ_CMD {
     I_SDCARD_SET_WPAGE  = 0x03,
     I_SDCARD_RAW_WRITE  = 0x04,
     
-    I_SDCARD_RANDOM     = 0x05,
+    I_RANDOM            = 0x05,
     
     I_SDCARD_MEMCPY     = 0x06,
     
