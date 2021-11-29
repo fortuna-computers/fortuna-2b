@@ -18,13 +18,13 @@
 - [ ] Z80 - I/O (input) ?
 - [X] Special I/O commands
   - [X] UART
-  - [ ] SDCard (raw) - to specific destination
+  - [X] SDCard (raw) - to specific destination
   - [X] Random
-  - [ ] Memory copy block
+  - [X] Memory copy block
   - [X] Wall clock
   - Improve code:
-    - [ ] Additional parameters
-    - [ ] Choose destination
+    - [X] Additional parameters
+    - [X] Choose destination
     - [ ] Error checking
 - [ ] Boot
 - [ ] FAT
