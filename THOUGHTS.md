@@ -85,3 +85,9 @@ I/O board
 21 -            D1
 22 -            D0
 ```
+
+# IO Requests
+
+- Command: 0xfdff
+  - `0xff` - return a random value, set at initialization (used for POST)
+- Data exchange area: 0xfe00 ~ 0xffff

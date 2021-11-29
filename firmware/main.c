@@ -7,6 +7,7 @@
 #include "config.h"
 
 #include "addr.h"
+#include "iorq.h"
 #include "post.h"
 #include "random.h"
 #include "ram.h"
@@ -27,6 +28,7 @@ int main(void)
 
     z80_init(Z80_SPEED_KHZ);
 
+    iorq_init();
     addr_init();
     rtc_init();
     ram_init();

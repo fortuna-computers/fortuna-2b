@@ -2,7 +2,7 @@
 PROJECT=fortuna-io
 
 # Object files (one for each source file)
-OBJECTS=main.o buffer.o response.o uart.o random.o addr.o rtc.o post.o ram.o sdcard.o spi.o z80.o
+OBJECTS=main.o buffer.o response.o uart.o random.o addr.o rtc.o post.o ram.o sdcard.o spi.o z80.o iorq.o
 
 # Avrdude configuration to connect on the PI. See avrdude_gpio.conf.
 # Can be one of: pi_rst, pi_cs0, pi_cs1 or pi_gpio, depending on the RESET line in AVR.
@@ -44,7 +44,7 @@ ${PROJECT}.elf: ${OBJECTS}
 	$(CC) -mmcu=${MCU_GCC} -o $@ $^ -Wl,--gc-sections
 	avr-size -C --mcu=${MCU_GCC} ${PROJECT}.elf
 
-post.c: post1.inc
+post.c: post1.inc post2.inc
 
 %.inc: %.z80
 	vasmz80_oldstyle -Fbin -o $(basename $<).bin $<

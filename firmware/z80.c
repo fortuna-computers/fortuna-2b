@@ -3,12 +3,12 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "uart.h"
+
 #define set_BUSRQ()    PORTB |=  (1 << PB0)
 #define clear_BUSRQ()  PORTB &= ~(1 << PB0)
 #define set_RST()      PORTB |=  (1 << PB2)
 #define clear_RST()    PORTB &= ~(1 << PB2)
-#define set_WAITST()   PORTB |=  (1 << PB3)
-#define clear_WAITST() PORTB &= ~(1 << PB3)
 #define set_CLK()      PORTD |=  (1 << PD5)
 #define clear_CLK()    PORTD &= ~(1 << PD5)
 #define set_INT()      PORTC |=  (1 << PC7)
@@ -28,8 +28,8 @@ void z80_init(uint16_t speed_khz)
     for (int i = 0; i < 50; ++i)
         z80_cycle();
 
-    // output: BUSRQ, WAITST
-    DDRB |= _BV(DDB0) | _BV(DDB3);
+    // output: BUSRQ
+    DDRB |= _BV(DDB0);
     
     // output: INT, NMI
     DDRC |= _BV(DDC6) | _BV(DDC7);
@@ -42,7 +42,6 @@ void z80_init(uint16_t speed_khz)
     
     // set pins to initial configuration
     set_BUSRQ();
-    set_WAITST();
     set_INT();
     set_NMI();
     
@@ -60,7 +59,6 @@ void z80_powerdown(void)
 void z80_powerup(void)
 {
     set_BUSRQ();
-    set_WAITST();
     set_INT();
     set_NMI();
     set_RST();

@@ -19,7 +19,7 @@
 #define clear_RD()    PORTD &= ~(1 << PD4)
 #define set_DATA(n)   PORTA = (n)
 #define get_DATA()    PINA
-#define WAIT()        { _NOP(); _NOP(); _NOP(); _NOP(); }
+#define WAIT()        { _NOP(); _NOP(); }
 
 static void ram_bus_takeover(bool for_writing)
 {

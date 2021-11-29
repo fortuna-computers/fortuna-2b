@@ -117,6 +117,7 @@ static void post_sdcard(void)
 // region -> Z80
 
 #include "post1.inc"
+#include "post2.inc"
 
 static void post_z80(void)
 {
@@ -145,6 +146,32 @@ static void post_z80(void)
     print_ok();
 }
 
+static void post_iorq(void)
+{
+    uart_print_P(PSTR("IORQ "));
+
+    uint8_t expected_byte = 0x0;  // TODO
+    
+    // load executable code into RAM
+    memcpy_P((void*) buffer, post2_bin, sizeof post2_bin);
+    ram_write_buffer(0, sizeof post2_bin);
+    
+    // run code for a few milliseconds
+    z80_powerup();
+    _delay_ms(20);
+    z80_powerdown();
+    
+    // check if the memory position was set correctly
+    _delay_ms(50);
+    ram_read_buffer(0x0, 0x20);
+    if (buffer[0x1e] != expected_byte) {
+        uart_puthex(buffer[0x1e]);
+        print_error_and_halt();
+    }
+    
+    print_ok();
+}
+
 // endregion
 
 void post_execute(void)
@@ -153,4 +180,5 @@ void post_execute(void)
     post_sdcard();
     post_ram();
     post_z80();
+    post_iorq();
 }
