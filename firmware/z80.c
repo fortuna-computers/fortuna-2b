@@ -111,8 +111,10 @@ static void z80_iorq(void)
     // request bus
     clear_BUSRQ();
     clear_WAITST();
-    while (get_BUSACK() != 0)
+    while (get_BUSACK() != 0) {
+        uart_wait_for_enter();
         z80_cycle();
+    }
     
     // do IO (read)
     if (rd) {
@@ -121,13 +123,11 @@ static void z80_iorq(void)
         
         DDRA = 0xff;    // set DATA as output
         PORTA = result;
-        uart_wait_for_enter();
     
         set_WAITST();
         set_BUSRQ();
         while (get_IORQ() == 0) {
             z80_cycle();
-            uart_wait_for_enter();
         }
         
         DDRA = 0x0;
