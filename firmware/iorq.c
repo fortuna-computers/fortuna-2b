@@ -10,3 +10,12 @@ void iorq_init(void)
 {
     post_byte = random_value();
 }
+
+uint8_t iorq_input(uint8_t cmd)
+{
+    return 0;
+}
+
+void iorq_output(uint8_t cmd, uint8_t data)
+{
+}

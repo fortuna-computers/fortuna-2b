@@ -117,14 +117,19 @@ static void z80_iorq(void)
     // do IO (read)
     if (rd) {
         uint8_t cmd = ram_get_byte(0xfdff);
-        uart_puthex(cmd);
-        for(;;);
+        uint8_t result = iorq_input(cmd);
+        
+        DDRA = 0xff;    // set DATA as output
+        PORTA = result;
+    
+        set_WAITST();
+        set_BUSRQ();
+        while (get_IORQ() == 0)
+            z80_cycle();
+        
     } else if (wr) {
     }
     
-    // return to how things were
-    set_WAITST();
-    set_BUSRQ();
     z80_start_clock();
 }
 
