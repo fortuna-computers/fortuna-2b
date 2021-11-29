@@ -24,6 +24,7 @@ uint8_t iorq_post_byte(void)
 uint16_t iorq_output(uint8_t cmd)    // returns bytes affected
 {
     switch (cmd) {
+        /*
         case I_UART_RECV:
             buffer[0] = uart_last_pressed_key();
             return 1;
@@ -67,6 +68,7 @@ uint16_t iorq_output(uint8_t cmd)    // returns bytes affected
             rtc_set_datetime(&dt);
             return 0;
         }
+        */
         
         case I_POST_TEST:
             buffer[0] = post_byte;
