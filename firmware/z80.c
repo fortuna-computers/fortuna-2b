@@ -1,5 +1,7 @@
 #include "z80.h"
 
+#include <stdbool.h>
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -99,7 +101,12 @@ void z80_cycle(void)
 
 static void z80_iorq(void)
 {
-    uart_putchar('X');
+    bool rd = get_RD();
+    bool rw = get_WR();
+    
+    if (rd)
+        uart_putchar('R');
+    
     for(;;);
 }
 
