@@ -21,4 +21,6 @@ void    uart_puthex_green(uint8_t value);
 
 void    uart_wait_for_enter(void);
 
+uint8_t uart_last_pressed_key(void);
+
 #endif

@@ -2,9 +2,12 @@
 
 #include <stdio.h>
 
+#include <avr/interrupt.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <util/setbaud.h>
+
+static volatile uint8_t last_pressed_key = 0;
 
 void uart_init(void)
 {
@@ -17,7 +20,10 @@ void uart_init(void)
     // set config
     UCSRC = (1<<URSEL) | (1<<UCSZ1) | (1<<UCSZ0);   // Async-mode 
     UCSRB = (1<<RXEN) | (1<<TXEN);                  // Enable Receiver and Transmitter
-
+    
+    // enable interrupt for RX
+    UCSRB |= (1<<RXEN) | (1<<RXCIE);
+    
     _delay_ms(100);
 }
 
@@ -111,4 +117,16 @@ void uart_wait_for_enter(void)
     uart_print_P(PSTR("? "));
     while (uart_getchar() != '\r');
     uart_putchar('\n');
+}
+
+uint8_t uart_last_pressed_key(void)
+{
+    uint8_t r = last_pressed_key;
+    last_pressed_key = 0;
+    return r;
+}
+
+ISR(USART_RXC_vect)
+{
+    last_pressed_key = uart_getchar();
 }
