@@ -101,15 +101,18 @@ void z80_cycle(void)
 
 static void z80_iorq(void)
 {
+    z80_stop_clock();
+    
+    // get IO direction
     bool rd = get_RD() == 0;
     bool wr = get_WR() == 0;
     
-    if (rd)
-        uart_putchar('R');
-    if (wr)
-        uart_putchar('W');
+    // request bus
+    clear_BUSRQ();
+    while (get_BUSACK() != 0)
+        z80_cycle();
     
-    for(;;);
+    uart_putchar('Y');
 }
 
 ISR(INT1_vect)   // interrupt: execute on IORQ
