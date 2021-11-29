@@ -100,10 +100,21 @@ void z80_cycle(void)
     clear_CLK();
 }
 
+static void z80_iorq_wr(void)
+{
+    uint8_t value = PORTA;
+    uart_puthex(value);
+    for(;;);
+}
+
 static void z80_iorq(void)
 {
     z80_stop_clock();
     
+    if (get_WR() == 0)
+        z80_iorq_wr();
+    
+    /*
     // get IO direction
     bool rd = get_RD() == 0;
     bool wr = get_WR() == 0;
@@ -111,10 +122,8 @@ static void z80_iorq(void)
     // request bus
     clear_BUSRQ();
     clear_WAITST();
-    while (get_BUSACK() != 0) {
-        uart_wait_for_enter();
+    while (get_BUSACK() != 0)
         z80_cycle();
-    }
     
     // do IO (read)
     if (rd) {
@@ -136,6 +145,7 @@ static void z80_iorq(void)
     }
     
     z80_start_clock();
+     */
 }
 
 ISR(INT1_vect)   // interrupt: execute on IORQ
