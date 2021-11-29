@@ -13,7 +13,7 @@ The RAM addresses used are:
 | `0104..0105` | `I_DEST`     | Destination of data in RAM | 16 bits |
 | `0106..0109` | `I_SD_BLOCK` | Block of SD card being operated on | 32 bits |
 | `010A..010B` | `I_SZ`       | Operation size | 16 bits |
-| `0200..03FF` | Buffer used to exchange 512-byte blocks of data | Read/write |
+| `0200..03FF` | Buffer used to exchange 512-byte blocks of data | Read/write | 512 bytes |
 
 I/O requests:
 
