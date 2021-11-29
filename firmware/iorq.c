@@ -1,8 +1,7 @@
 #include "iorq.h"
 
-#include "ram.h"
+#include "buffer.h"
 #include "random.h"
-#include "uart.h"
 
 static uint8_t post_byte;   // byte used for testing POST
 
@@ -11,11 +10,17 @@ void iorq_init(void)
     post_byte = random_value();
 }
 
-uint8_t iorq_input(uint8_t cmd)
+uint8_t iorq_post_byte(void)
 {
-    return 0xf0;
+    return post_byte;
 }
 
-void iorq_output(uint8_t cmd, uint8_t data)
+uint16_t iorq_output(uint8_t cmd)    // returns bytes affected
 {
+    switch (cmd) {
+        case 0xff:
+            buffer[0] = post_byte;
+            return 1;
+    }
+    return 0;
 }

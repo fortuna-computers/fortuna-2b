@@ -1,12 +1,6 @@
-TARGET_ADDR  = 0x1e    ; memory position that will be checked
-POST_COMMAND = 0xff    ; this port will provided the expected value for comparison
-CMD_ADDR     = 0xfdff
-EXPECTED_VALUE = 0x42
+CMD_POST_VALUE = $FF
 
-    ld      hl, CMD_ADDR            ; call IORQ for POST_COMMAND
-    ld      (hl), POST_COMMAND
-
-    ld      a, EXPECTED_VALUE
+    ld      a, CMD_POST_VALUE       ; send a command to set POST value at $FE00
     out     (0), a
 
 done:                               ; halt CPU

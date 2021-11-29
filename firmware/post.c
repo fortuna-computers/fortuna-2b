@@ -4,6 +4,7 @@
 #include <util/delay.h>
 
 #include "buffer.h"
+#include "iorq.h"
 #include "ram.h"
 #include "random.h"
 #include "rtc.h"
@@ -136,7 +137,6 @@ static void post_z80(void)
     z80_powerdown();
     
     // check if the memory position was set correctly
-    _delay_ms(50);
     ram_read_buffer(0x0, 0x20);
     if (buffer[0x1f] != expected_byte) {
         uart_puthex(buffer[0x1f]);
@@ -150,8 +150,6 @@ static void post_iorq(void)
 {
     uart_print_P(PSTR("IORQ "));
 
-    uint8_t expected_byte = 0x0;  // TODO
-    
     // load executable code into RAM
     memcpy_P((void*) buffer, post2_bin, sizeof post2_bin);
     ram_write_buffer(0, sizeof post2_bin);
@@ -162,10 +160,9 @@ static void post_iorq(void)
     z80_powerdown();
     
     // check if the memory position was set correctly
-    _delay_ms(50);
-    ram_read_buffer(0x0, 0x20);
-    if (buffer[0x1e] != expected_byte) {
-        uart_puthex(buffer[0x1e]);
+    uint8_t byte = ram_get_byte(DATA_EXCHANGE_AREA);
+    if (byte != iorq_post_byte()) {
+        uart_puthex(buffer[0x1f]);
         print_error_and_halt();
     }
     

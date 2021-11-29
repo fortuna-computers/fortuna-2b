@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 
+#include <avr/cpufunc.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -26,7 +27,6 @@
 #define get_IORQ()     (PIND & (1 << PIND3))
 #define get_WR()       (PIND & _BV(PD6))
 #define get_RD()       (PIND & _BV(PD4))
-
 
 static volatile uint16_t z80_speed_khz = 0;
 
@@ -102,9 +102,23 @@ void z80_cycle(void)
 
 static void z80_iorq_wr(void)
 {
-    uint8_t value = PORTA;
-    uart_puthex(value);
-    for(;;);
+    // find command
+    uint8_t cmd = PINA;
+    
+    // request bus
+    clear_BUSRQ();
+    clear_WAITST();
+    while (get_BUSACK() != 0)
+        z80_cycle();
+
+    // do IO
+    uint16_t bytes_affected = iorq_output(cmd);
+    if (bytes_affected > 0 && bytes_affected < 512)
+        ram_write_buffer(DATA_EXCHANGE_AREA, bytes_affected);
+
+    // return everything to normal
+    set_BUSRQ();
+    set_WAITST();
 }
 
 static void z80_iorq(void)
@@ -114,38 +128,7 @@ static void z80_iorq(void)
     if (get_WR() == 0)
         z80_iorq_wr();
     
-    /*
-    // get IO direction
-    bool rd = get_RD() == 0;
-    bool wr = get_WR() == 0;
-    
-    // request bus
-    clear_BUSRQ();
-    clear_WAITST();
-    while (get_BUSACK() != 0)
-        z80_cycle();
-    
-    // do IO (read)
-    if (rd) {
-        uint8_t cmd = ram_get_byte(0xfdff);
-        uint8_t result = iorq_input(cmd);
-        
-        DDRA = 0xff;    // set DATA as output
-        PORTA = result;
-    
-        set_WAITST();
-        set_BUSRQ();
-        while (get_IORQ() == 0) {
-            z80_cycle();
-        }
-        
-        DDRA = 0x0;
-        
-    } else if (wr) {
-    }
-    
     z80_start_clock();
-     */
 }
 
 ISR(INT1_vect)   // interrupt: execute on IORQ
