@@ -13,10 +13,10 @@ typedef enum IORQ_CMD {
     
     I_RANDOM            = 0x05,
     
-    I_SDCARD_MEMCPY     = 0x06,
+    I_MEMCPY            = 0x06,
     
-    I_SDCARD_RTC_GET    = 0x07,
-    I_SDCARD_RTC_SET    = 0x08,
+    I_RTC_GET           = 0x07,
+    I_RTC_SET           = 0x08,
     
     I_POST_TEST         = 0xff,
 } IORQ_CMD;
