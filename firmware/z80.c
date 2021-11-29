@@ -101,11 +101,13 @@ void z80_cycle(void)
 
 static void z80_iorq(void)
 {
-    bool rd = get_RD();
-    bool rw = get_WR();
+    bool rd = get_RD() == 0;
+    bool wr = get_WR() == 0;
     
     if (rd)
         uart_putchar('R');
+    if (wr)
+        uart_putchar('W');
     
     for(;;);
 }
