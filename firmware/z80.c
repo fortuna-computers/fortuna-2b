@@ -7,6 +7,7 @@
 
 #include "iorq.h"
 #include "uart.h"
+#include "ram.h"
 
 #define set_BUSRQ()    PORTB |=  (1 << PB0)
 #define clear_BUSRQ()  PORTB &= ~(1 << PB0)
@@ -113,8 +114,13 @@ static void z80_iorq(void)
     while (get_BUSACK() != 0)
         z80_cycle();
     
-    uart_putchar('Y');
-    for (;;);
+    // do IO (read)
+    if (rd) {
+        uint8_t cmd = ram_get_byte(0xfdff);
+        uart_puthex(cmd);
+        for(;;);
+    } else if (wr) {
+    }
     
     // return to how things were
     set_WAITST();
