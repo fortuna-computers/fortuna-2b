@@ -127,6 +127,8 @@ static void z80_iorq(void)
         while (get_IORQ() == 0)
             z80_cycle();
         
+        DDRA = 0x0;
+        
     } else if (wr) {
     }
     
