@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
+#include "iorq.h"
 #include "uart.h"
 
 #define set_BUSRQ()    PORTB |=  (1 << PB0)
@@ -19,8 +20,25 @@
 #define get_BUSACK()   (PINB & (1 << PINB1))
 #define get_IORQ()     (PIND & (1 << PIND3))
 
+static volatile uint16_t z80_speed_khz = 0;
+
+static void z80_stop_clock(void)
+{
+    TCCR1A = 0;
+}
+
+static void z80_start_clock(void)
+{
+    // clock output on OC1A (PD5)
+    OCR1A = F_CPU / (2UL * (unsigned long) z80_speed_khz * 1000UL) - 1UL;  // calculate speed
+    TCCR1A = (1 << COM1A0);                  // Toggle OC1A/OC1B on compare match
+    TCCR1B = (1 << WGM12) | (1 << CS10);     // CTC mode, top OCR1A, no prescaling (clk/1)
+}
+
 void z80_init(uint16_t speed_khz)
 {
+    z80_speed_khz = speed_khz;
+
     // reset CPU
     DDRB |= _BV(DDB2);  // RST
     DDRD |= _BV(DDD5);  // CLK
@@ -45,10 +63,7 @@ void z80_init(uint16_t speed_khz)
     set_INT();
     set_NMI();
     
-    // clock output on OC1A (PD5)
-    OCR1A = F_CPU / (2UL * (unsigned long) speed_khz * 1000UL) - 1UL;  // calculate speed
-    TCCR1A = (1 << COM1A0);                  // Toggle OC1A/OC1B on compare match
-    TCCR1B = (1 << WGM12) | (1 << CS10);     // CTC mode, top OCR1A, no prescaling (clk/1)
+    z80_start_clock();
 }
 
 void z80_powerdown(void)
@@ -68,4 +83,21 @@ void z80_cycle(void)
 {
     set_CLK();
     clear_CLK();
+}
+
+void z80_request_bus(void)
+{
+    z80_stop_clock();
+    iorq_release_wait();
+
+    clear_BUSRQ();
+    while (get_BUSACK() != 0)
+        z80_cycle();
+
+    z80_start_clock();
+}
+
+void z80_release_bus(void)
+{
+    set_BUSRQ();
 }

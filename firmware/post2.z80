@@ -1,0 +1,13 @@
+TARGET_ADDR  = 0x1e    ; memory position that will be checked
+POST_COMMAND = 0xff    ; this port will provided the expected value for comparison
+CMD_ADDR     = 0xfdff
+
+    ld      hl, CMD_ADDR            ; call IORQ for POST_COMMAND
+    ld      (hl), POST_COMMAND
+    in      a, (0)
+
+    ld      hl, TARGET_ADDR         ; store returned value in TARGET_ADDR
+    ld      (hl), a
+
+done:                               ; halt CPU
+    jr      done

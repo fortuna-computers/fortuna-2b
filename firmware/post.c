@@ -155,7 +155,7 @@ static void post_iorq(void)
     // load executable code into RAM
     memcpy_P((void*) buffer, post2_bin, sizeof post2_bin);
     ram_write_buffer(0, sizeof post2_bin);
-    
+
     // run code for a few milliseconds
     z80_powerup();
     _delay_ms(20);

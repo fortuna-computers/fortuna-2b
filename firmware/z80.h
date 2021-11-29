@@ -9,5 +9,6 @@ void z80_powerup(void);
 void z80_powerdown(void);
 
 void z80_cycle(void);
+void z80_request_bus(void);
 
 #endif

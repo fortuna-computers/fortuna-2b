@@ -40,11 +40,6 @@ static void ram_bus_release(void)
     addr_disable();
     DDRA = 0x0;                                 // data
     DDRD &= ~(_BV(PD2) | _BV(PD4) | _BV(PD6));  // MREQ, RD, WR
-    
-    set_MREQ();   // all control pins high, data = 0x0
-    set_WR();
-    set_RD();
-    set_DATA(0x0);
 }
 
 void ram_init(void)
@@ -106,6 +101,12 @@ void ram_read_buffer(uint16_t addr, uint16_t count)
     }
     
     ram_bus_release();
+}
+
+uint8_t ram_get_byte(uint16_t addr)
+{
+    ram_read_buffer(addr, 1);
+    return buffer[0];
 }
 
 void ram_dump(uint16_t addr, uint16_t until)
