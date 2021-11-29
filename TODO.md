@@ -14,7 +14,8 @@
 - [X] Improve randomness
 - [X] Build main board
 - [X] Z80 - regular execution
-- [ ] Z80 - I/O
+- [X] Z80 - I/O (output)
+- [ ] Z80 - I/O (input) ?
 - [ ] Special I/O commands
   - [ ] UART
   - [ ] SDCard (raw)
