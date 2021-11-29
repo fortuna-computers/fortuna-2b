@@ -1,5 +1,7 @@
 #include "iorq.h"
 
+#include <string.h>
+
 #include "buffer.h"
 #include "ram.h"
 #include "random.h"
@@ -9,7 +11,15 @@
 #include "z80.h"
 
 static uint8_t post_byte;   // byte used for testing POST
-static uint32_t sdcard_wpage;
+
+typedef struct __attribute__((packed)) IO_Registers {
+    uint16_t I_ORIG;
+    uint16_t I_DEST;
+    uint32_t I_SD_BLOCK;
+    uint16_t I_SZ;
+} IO_Registers;
+
+#define IO_REGISTERS_ADDR 0x100
 
 void iorq_init(void)
 {
@@ -21,8 +31,13 @@ uint8_t iorq_post_byte(void)
     return post_byte;
 }
 
-uint16_t iorq_output(uint8_t cmd)    // returns bytes affected
+void iorq_output(uint8_t cmd)    // returns bytes affected
 {
+    IO_Registers reg;
+    
+    ram_read_buffer(IO_REGISTERS_ADDR, sizeof(IO_Registers));
+    memcpy(&reg, (const void *) buffer, sizeof(IO_Registers));
+    
     switch (cmd) {
         /*
         case I_UART_RECV:
@@ -72,7 +87,7 @@ uint16_t iorq_output(uint8_t cmd)    // returns bytes affected
         
         case I_POST_TEST:
             buffer[0] = post_byte;
-            return 1;
+            ram_write_buffer(reg.I_DEST, 1);
+            break;
     }
-    return 0;
 }

@@ -112,9 +112,7 @@ static void z80_iorq_wr(void)
         z80_cycle();
 
     // do IO
-    uint16_t bytes_affected = iorq_output(cmd);
-    if (bytes_affected > 0 && bytes_affected < 512)
-        ram_write_buffer(DATA_EXCHANGE_AREA, bytes_affected);
+    iorq_output(cmd);
 
     // return everything to normal
     set_BUSRQ();

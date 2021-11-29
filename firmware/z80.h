@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-#define DATA_EXCHANGE_AREA 0xfe00
-
 void z80_init(uint16_t speed_khz);
 
 void z80_powerup(void);
