@@ -1,93 +1,30 @@
-Boards:
-
- - Main board
-   - External connections
-     - USB power
-     - Power button
-     - Indicator LEDs
-       - Power
-       - Storage activity
-     - SDCard
-     - PS/2 keyboard
-     - VGA
-     - Serial (UART) / USB (FTDI) ?
-   - Connector for auxiliary boards
-   - ICs
-     - Z80
-     - Flip/flop for WAIT line
-     
- - I/O board
-   - Functionalities
-     - UART
-     - ROM
-     - SDCard + FAT
-     - Memory copy block
-     - Random value provider
-     - Wall clock
-     - Clock signal for the whole system
-   - ICs
-     - ATMEGA16
-       - Pins: 5V, GND, Reset, UART (2), 595 control (4), DATA (8), clock out, memory control (3), SDCard (4), IORQ (interrupted), BUSRQ/AK (2), RSTZ80, WAITST
-       - Maybe: interrupt, NMI, I²C for RTC (2), crystal (2)
-       - Total: 30, maybe 6
-     - 74HC595 for Address bus expansion
-       - Pins controlling 74HC595: SER (x2), SRCLK, OE (RCLK and SRCLR are kept high)
-     - RTC?
-     - Crystal?
-   - Header for Fortuna Connector
-   - How to select the clock?
-   - Pinout: 
-     - 5V, GND, ADDR (16), DATA (8), UART (2), SDCard (4), Clock, MREQ, IORQ, RD, WR, BUSRQ, BUSAK, RSTZ80, WAITST
-     - Maybe: INT, NMI
-     - Total: 43 pins (at least)
-
- - RAM board
-   - ICs
-     - 62256 x2
-     - 74HC00 to select which memory bank
-   - Pinout:
-     - 5V, GND, ADDR (16), DATA (8), MREQ, RD, WR
-     - Total: 29 pins (at least)
- 
- - Video/keyboard board
-   - Use fortuna-terminal
-
- - Maybe external connection to debugger?
-
-## Pinouts
-
-I/O board
-
-```
- 1 - BUSRQ    MOSI
- 2 - BUSAK    MISO
- 3 - RSTZ80    SCK
- 4 - RX         TX
- 5 - VCC        A9
- 6 - A15        A8
-
- 7 - A14        A7
- 8 - A13        A6
- 9 - A12        A5
-10 - A11        A4
-11 - A10        A3
-12 - MREQ       A2
-
-13 - WR         A1
-14 - RD         A0
-15 - IORQ       D7
-16 - CLK        D6
-17 - INT        D5
-18 - NMI        D4
-
-19 - WAITST     D3
-20 - GND        D2
-21 -            D1
-22 -            D0
-```
-
 # IO Requests
 
-- Command: 0xfdff
-  - `0xff` - return a random value, set at initialization (used for POST)
-- Data exchange area: 0xfe00 ~ 0xffff
+I/O requests are always done by writing to the I/O port `0x0`. If there is return data, it'll be 
+written directly to RAM.
+
+The RAM addresses used are:
+
+| Address      | Register     | Description | Size |
+|--------------|--------------|-------------|------|
+| `0100`       | `I_CMD`      | Request command | 8 bits |
+| `0101`       | `I_STATUS`   | Last command status | 8 bits |
+| `0102..0103` | `I_ORIG`     | Origin of data in RAM | 16 bits |
+| `0104..0105` | `I_DEST`     | Destination of data in RAM | 16 bits |
+| `0106..0109` | `I_SD_BLOCK` | Block of SD card being operated on | 32 bits |
+| `010A..010B` | `I_SZ`       | Operation size | 16 bits |
+| `0200..03FF` | Buffer used to exchange 512-byte blocks of data | Read/write |
+
+I/O requests:
+
+| Request               | Byte   | Request parameters | Description |
+|-----------------------|--------|--------------------|----------|
+| `I_LAST_KEYPRESS`     | `0x00` | `I_DEST`           | Store last keypress in memory location (0 = no keypress) |
+| `I_PRINT`             | `0x01` | `I_ORIG`           | Print char to screen |
+| `I_SDCARD_RAW_READ`   | `0x02` | `I_DEST`, `I_SD_BLOCK` | Read a SDCard block and store it on RAM |
+| `I_SDCARD_RAW_WRITE`  | `0x03` | `I_ORIG`, `I_SD_BLOCK` | Write a SDCard block from RAM |
+| `I_RANDOM`            | `0x04` | `I_DEST`, `I_SZ` (1 to 4) | Store random value in memory location |
+| `I_MEMCPY`            | `0x05` | `I_ORIG`, `I_DEST`, `I_SZ` | Copy a memory block from one location to the other |
+| `I_RTC_GET`           | `0x06` |                    | Store RTC values in buffer (`yy mm dd hh nn ss`) |
+| `I_RTC_SET`           | `0x07` |                    | Set RTC based on buffer values (`yy mm dd hh nn ss`) |
+| `I_POST_TEST`         | `0xff` | `I_DEST`           | Set memory location with a predefined value. Used by POST only. |
