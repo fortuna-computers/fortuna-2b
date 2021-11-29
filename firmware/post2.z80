@@ -1,6 +1,12 @@
-CMD_POST_VALUE = $FF
+I_DEST           = $102
+CMD_POST_VALUE   = $FF
+DESTINATION_ADDR = 0x1234
 
-    ld      a, CMD_POST_VALUE       ; send a command to set POST value at $FE00
+    ld      hl, I_DEST
+    ld      (hl), DESTINATION_ADDR & $ff
+    inc     hl
+    ld      (hl), DESTINATION_ADDR >> 8
+    ld      a, CMD_POST_VALUE
     out     (0), a
 
 done:                               ; halt CPU

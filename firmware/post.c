@@ -160,9 +160,8 @@ static void post_iorq(void)
     z80_powerdown();
     
     // check if the memory position was set correctly
-    uint8_t byte = ram_get_byte(DATA_EXCHANGE_AREA);
+    uint8_t byte = ram_get_byte(0x1234);
     if (byte != iorq_post_byte()) {
-        uart_puthex(buffer[0x1f]);
         print_error_and_halt();
     }
     
