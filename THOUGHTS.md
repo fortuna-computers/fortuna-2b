@@ -1,18 +1,17 @@
 # IO Requests
 
-I/O requests are always done by writing to the I/O port `0x0`. If there is return data, it'll be 
-written directly to RAM.
+I/O requests are always done by writing to the I/O port `0x0`, passing the request command.
+If there is return data, it'll be written directly to RAM.
 
 The RAM addresses used are:
 
 | Address      | Register     | Description | Size |
 |--------------|--------------|-------------|------|
-| `0100`       | `I_CMD`      | Request command | 8 bits |
-| `0101`       | `I_STATUS`   | Last command status | 8 bits |
-| `0102..0103` | `I_ORIG`     | Origin of data in RAM | 16 bits |
-| `0104..0105` | `I_DEST`     | Destination of data in RAM | 16 bits |
-| `0106..0109` | `I_SD_BLOCK` | Block of SD card being operated on | 32 bits |
-| `010A..010B` | `I_SZ`       | Operation size | 16 bits |
+| `0100..0101` | `I_ORIG`     | Origin of data in RAM | 16 bits |
+| `0102..0103` | `I_DEST`     | Destination of data in RAM | 16 bits |
+| `0104..0107` | `I_SD_BLOCK` | Block of SD card being operated on | 32 bits |
+| `0108..0109` | `I_SZ`       | Operation size | 16 bits |
+| `010A`       | `I_STATUS`   | Last command status | 8 bits |
 | `0200..03FF` | Buffer used to exchange 512-byte blocks of data | Read/write | 512 bytes |
 
 I/O requests:
