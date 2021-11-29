@@ -1,7 +1,7 @@
 #include "z80.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
+#include <avr/interrupt.h>
 
 #include "iorq.h"
 #include "uart.h"
@@ -16,9 +16,14 @@
 #define clear_INT()    PORTC &= ~(1 << PC7)
 #define set_NMI()      PORTC |=  (1 << PC6)
 #define clear_NMI()    PORTC &= ~(1 << PC6)
+#define set_WAITST()   PORTB |=  (1 << PB3)
+#define clear_WAITST() PORTB &= ~(1 << PB3)
 
 #define get_BUSACK()   (PINB & (1 << PINB1))
 #define get_IORQ()     (PIND & (1 << PIND3))
+#define get_WR()       (PIND & _BV(PD6))
+#define get_RD()       (PIND & _BV(PD4))
+
 
 static volatile uint16_t z80_speed_khz = 0;
 
@@ -40,7 +45,7 @@ void z80_init(uint16_t speed_khz)
     z80_speed_khz = speed_khz;
 
     // reset CPU
-    DDRB |= _BV(DDB2);  // RST
+    DDRB |= _BV(DDB2) | _BV(DDB3);  // RST, WAITST
     DDRD |= _BV(DDD5);  // CLK
     clear_RST();
     for (int i = 0; i < 50; ++i)
@@ -62,6 +67,13 @@ void z80_init(uint16_t speed_khz)
     set_BUSRQ();
     set_INT();
     set_NMI();
+    set_WAITST();
+    
+    // enable interrupt for IORQ
+    cli();
+    GICR = (1 << INT1);     // enable interrupt on INT1 (IORQ)
+    MCUCR = (1 << ISC11);   //   on falling edge
+    sei();
     
     z80_start_clock();
 }
@@ -85,19 +97,13 @@ void z80_cycle(void)
     clear_CLK();
 }
 
-void z80_request_bus(void)
+static void z80_iorq(void)
 {
-    z80_stop_clock();
-    iorq_release_wait();
-
-    clear_BUSRQ();
-    while (get_BUSACK() != 0)
-        z80_cycle();
-
-    z80_start_clock();
+    uart_putchar('X');
+    for(;;);
 }
 
-void z80_release_bus(void)
+ISR(INT1_vect)   // interrupt: execute on IORQ
 {
-    set_BUSRQ();
+    z80_iorq();
 }
