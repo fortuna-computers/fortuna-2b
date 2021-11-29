@@ -16,12 +16,16 @@
 - [X] Z80 - regular execution
 - [X] Z80 - I/O (output)
 - [ ] Z80 - I/O (input) ?
-- [ ] Special I/O commands
-  - [ ] UART
-  - [ ] SDCard (raw)
-  - [ ] Random
+- [X] Special I/O commands
+  - [X] UART
+  - [ ] SDCard (raw) - to specific destination
+  - [X] Random
   - [ ] Memory copy block
-  - [ ] Wall clock
+  - [X] Wall clock
+  - Improve code:
+    - [ ] Additional parameters
+    - [ ] Choose destination
+    - [ ] Error checking
 - [ ] Boot
 - [ ] FAT
 - [ ] Video / Keyboard
