@@ -109,10 +109,17 @@ static void z80_iorq(void)
     
     // request bus
     clear_BUSRQ();
+    clear_WAITST();
     while (get_BUSACK() != 0)
         z80_cycle();
     
     uart_putchar('Y');
+    for (;;);
+    
+    // return to how things were
+    set_WAITST();
+    set_BUSRQ();
+    z80_start_clock();
 }
 
 ISR(INT1_vect)   // interrupt: execute on IORQ
