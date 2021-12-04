@@ -1,0 +1,3 @@
+[submodule "firmware/terminal"]
+	path = firmware/terminal
+	url = https://github.com/fortuna-computers/fortuna-terminal.git
